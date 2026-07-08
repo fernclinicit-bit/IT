@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fern Clinic Chat Flow</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="เมนูหลัก">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="fern-clinic-logo.png" alt="" />
+          </div>
+          <div>
+            <strong>Fern Clinic</strong>
+            <span>รวมแชทและเก็บข้อมูลลูกค้า</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item active" type="button" data-view="inbox">
+            <span class="icon">⌂</span>
+            <span>กล่องแชท</span>
+          </button>
+          <button class="nav-item" type="button" data-view="workflow">
+            <span class="icon">↬</span>
+            <span>Workflow</span>
+          </button>
+          <button class="nav-item" type="button" data-view="customers">
+            <span class="icon">◎</span>
+            <span>ข้อมูลลูกค้า</span>
+          </button>
+          <button class="nav-item" type="button" data-view="userAccounts">
+            <span class="icon">◉</span>
+            <span>บัญชีผู้ใช้งาน</span>
+          </button>
+          <button class="nav-item" type="button" data-view="settings">
+            <span class="icon">⚙</span>
+            <span>เชื่อมต่อช่องทาง</span>
+          </button>
+        </nav>
+
+        <div class="channel-health">
+          <h2>สถานะช่องทาง</h2>
+          <div class="health-row">
+            <span class="dot facebook"></span>
+            <span>Facebook</span>
+            <strong>พร้อม</strong>
+          </div>
+          <div class="health-row">
+            <span class="dot line"></span>
+            <span>LINE</span>
+            <strong>พร้อม</strong>
+          </div>
+          <div class="health-row">
+            <span class="dot tiktok"></span>
+            <span>TikTok</span>
+            <strong>รอ API</strong>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Unified inbox</p>
+            <h1>ศูนย์รวมแชท Facebook, LINE, TikTok</h1>
+          </div>
+          <div class="top-actions">
+            <label class="search">
+              <span>⌕</span>
+              <input id="searchInput" type="search" placeholder="ค้นหาชื่อ, ข้อความ, เบอร์โทร" />
+            </label>
+            <button id="syncButton" class="primary-button" type="button">ซิงก์แชท</button>
+          </div>
+        </header>
+
+        <section id="inboxView" class="view active" aria-label="กล่องแชทรวม">
+          <div class="metrics-grid">
+            <article class="metric">
+              <span>แชทใหม่วันนี้</span>
+              <strong id="newChatsMetric">0</strong>
+              <small>รวมทุกช่องทาง</small>
+            </article>
+            <article class="metric">
+              <span>ข้อมูลที่ดึงได้</span>
+              <strong id="capturedMetric">0%</strong>
+              <small>ชื่อ, เบอร์, ความสนใจ</small>
+            </article>
+            <article class="metric">
+              <span>ต้องติดตาม</span>
+              <strong id="followMetric">0</strong>
+              <small>มี workflow รอดำเนินการ</small>
+            </article>
+            <article class="metric ai-metric">
+              <span>AI ต้องตอบภายใน 2 นาที</span>
+              <strong id="aiPendingMetric">0</strong>
+              <small>แชทที่ลูกค้ายังไม่ได้รับคำตอบ</small>
+            </article>
+          </div>
+
+          <div class="inbox-layout">
+            <section class="conversation-panel" aria-label="รายการแชท">
+              <div class="panel-head">
+                <h2>บทสนทนา</h2>
+                <div class="channel-tabs" role="tablist" aria-label="กรองช่องทาง">
+                  <button class="chip active" type="button" data-channel="all">ทั้งหมด</button>
+                  <button class="chip" type="button" data-channel="Facebook">Facebook</button>
+                  <button class="chip" type="button" data-channel="LINE">LINE</button>
+                  <button class="chip" type="button" data-channel="TikTok">TikTok</button>
+                </div>
+              </div>
+              <div id="conversationList" class="conversation-list"></div>
+            </section>
+
+            <section class="chat-panel" aria-label="รายละเอียดแชท">
+              <div id="chatDetail" class="chat-detail"></div>
+            </section>
+
+            <aside class="profile-panel" aria-label="ข้อมูลที่เก็บจากแชท">
+              <div id="profileDetail"></div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="workflowView" class="view" aria-label="Workflow การเก็บข้อมูล">
+          <div class="workflow-header">
+            <div>
+              <p class="eyebrow">Data capture workflow</p>
+              <h2>ขั้นตอนเก็บข้อมูลจากแชททั้งหมด</h2>
+            </div>
+            <button id="runWorkflowButton" class="primary-button" type="button">ประมวลผลตัวอย่าง</button>
+          </div>
+          <div class="workflow-grid" id="workflowGrid"></div>
+        </section>
+
+        <section id="customersView" class="view" aria-label="ฐานข้อมูลลูกค้า">
+          <div class="panel-head">
+            <h2>ข้อมูลลูกค้า</h2>
+            <div class="customer-actions">
+              <span id="selectedCustomersCount" class="selection-count">เลือก 0 รายการ</span>
+              <div class="customer-filters" role="tablist" aria-label="ค้นหาตามช่องทาง">
+                <button class="filter-button active" type="button" data-customer-channel="all">ทั้งหมด</button>
+                <button class="filter-button" type="button" data-customer-channel="Facebook">Facebook</button>
+                <button class="filter-button" type="button" data-customer-channel="LINE">LINE</button>
+                <button class="filter-button" type="button" data-customer-channel="TikTok">TikTok</button>
+              </div>
+              <button id="exportButton" class="secondary-button" type="button">ส่งออก CSV</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="check-cell">
+                    <input id="selectAllCustomers" type="checkbox" aria-label="เลือกลูกค้าทั้งหมดในตาราง" />
+                  </th>
+                  <th>ลูกค้า</th>
+                  <th>ช่องทาง</th>
+                  <th>เบอร์โทร</th>
+                  <th>ความสนใจ</th>
+                  <th>สถานะ</th>
+                  <th>รูปก่อน/หลัง</th>
+                  <th>สลิปโอนเงิน</th>
+                  <th>เจ้าของงาน</th>
+                </tr>
+              </thead>
+              <tbody id="customerRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="userAccountsView" class="view" aria-label="บัญชีผู้ใช้งาน">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Team access</p>
+              <h2>บัญชีผู้ใช้งาน</h2>
+            </div>
+            <button id="addUserButton" class="primary-button" type="button">เพิ่มผู้ใช้งาน</button>
+          </div>
+
+          <div id="userFormPanel" class="user-form-panel" role="dialog" aria-modal="true" aria-labelledby="userFormTitle" hidden>
+            <form id="userAccountForm" class="user-account-form">
+              <div class="form-heading">
+                <p id="userFormMode" class="eyebrow">New account</p>
+                <h3 id="userFormTitle">เพิ่มผู้ใช้งาน</h3>
+              </div>
+              <label class="form-field">
+                <span>ชื่อผู้ใช้งาน</span>
+                <input name="name" type="text" placeholder="เช่น Sale C" required />
+              </label>
+              <label class="form-field">
+                <span>อีเมล</span>
+                <input name="email" type="email" placeholder="name@omnichat.example" required />
+              </label>
+              <label class="form-field">
+                <span>บทบาท</span>
+                <select name="role" required>
+                  <option value="ทีมขาย">ทีมขาย</option>
+                  <option value="ผู้ดูแลระบบ">ผู้ดูแลระบบ</option>
+                  <option value="หัวหน้าทีม">หัวหน้าทีม</option>
+                  <option value="ผู้ดูข้อมูล">ผู้ดูข้อมูล</option>
+                </select>
+              </label>
+              <label class="form-field">
+                <span>สถานะ</span>
+                <select name="status" required>
+                  <option value="ใช้งานอยู่">ใช้งานอยู่</option>
+                  <option value="รอเชิญตอบรับ">รอเชิญตอบรับ</option>
+                </select>
+              </label>
+              <div class="form-actions">
+                <button id="saveUserButton" class="primary-button" type="submit">บันทึกผู้ใช้งาน</button>
+                <button id="cancelUserButton" class="secondary-button" type="button">ยกเลิก</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="accountsGrid" class="accounts-grid"></div>
+
+          <div class="table-wrap accounts-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>ชื่อผู้ใช้งาน</th>
+                  <th>อีเมล</th>
+                  <th>บทบาท</th>
+                  <th>สถานะ</th>
+                  <th>เข้าระบบล่าสุด</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="userAccountRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="settingsView" class="view" aria-label="ตั้งค่าช่องทาง">
+          <div class="settings-head">
+            <div>
+              <p class="eyebrow">Channel connections</p>
+              <h2>ตั้งค่า Key เพื่อลิงค์ช่องแชท</h2>
+            </div>
+            <span class="settings-note">ค่าจะถูกเก็บไว้ในเครื่องนี้สำหรับต้นแบบ</span>
+          </div>
+
+          <div class="settings-grid" id="settingsGrid">
+            <article class="integration facebook-border" data-platform="facebook">
+              <div class="integration-title">
+                <div>
+                  <h2>Facebook Messenger</h2>
+                  <p>Meta Webhook และ Page access token</p>
+                </div>
+                <span class="connection-state" data-status="facebook">ยังไม่เชื่อมต่อ</span>
+              </div>
+              <code>/webhooks/facebook</code>
+              <label class="form-field">
+                <span>Page ID</span>
+                <input name="pageId" type="text" placeholder="เช่น 1234567890" />
+              </label>
+              <label class="form-field secret-field">
+                <span>Page Access Token</span>
+                <div>
+                  <input name="accessToken" type="password" placeholder="กรอก Page access token" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Page Access Token">◉</button>
+                </div>
+              </label>
+              <label class="form-field secret-field">
+                <span>Verify Token</span>
+                <div>
+                  <input name="verifyToken" type="password" placeholder="ตั้งค่า verify token" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Verify Token">◉</button>
+                </div>
+              </label>
+              <div class="integration-actions">
+                <button class="save-config" type="button">บันทึก</button>
+                <button class="test-config" type="button">ทดสอบ</button>
+                <button class="clear-config" type="button">ล้างค่า</button>
+              </div>
+            </article>
+
+            <article class="integration line-border" data-platform="line">
+              <div class="integration-title">
+                <div>
+                  <h2>LINE Official Account</h2>
+                  <p>LINE Messaging API และ Channel secret</p>
+                </div>
+                <span class="connection-state" data-status="line">ยังไม่เชื่อมต่อ</span>
+              </div>
+              <code>/webhooks/line</code>
+              <label class="form-field">
+                <span>Channel ID</span>
+                <input name="channelId" type="text" placeholder="กรอก Channel ID" />
+              </label>
+              <label class="form-field secret-field">
+                <span>Channel Secret</span>
+                <div>
+                  <input name="channelSecret" type="password" placeholder="กรอก Channel secret" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Channel Secret">◉</button>
+                </div>
+              </label>
+              <label class="form-field secret-field">
+                <span>Channel Access Token</span>
+                <div>
+                  <input name="accessToken" type="password" placeholder="กรอก Channel access token" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Channel Access Token">◉</button>
+                </div>
+              </label>
+              <div class="integration-actions">
+                <button class="save-config" type="button">บันทึก</button>
+                <button class="test-config" type="button">ทดสอบ</button>
+                <button class="clear-config" type="button">ล้างค่า</button>
+              </div>
+            </article>
+
+            <article class="integration tiktok-border" data-platform="tiktok">
+              <div class="integration-title">
+                <div>
+                  <h2>TikTok</h2>
+                  <p>API key หรือ Inbox export ตามสิทธิ์บัญชีธุรกิจ</p>
+                </div>
+                <span class="connection-state" data-status="tiktok">ยังไม่เชื่อมต่อ</span>
+              </div>
+              <code>/webhooks/tiktok</code>
+              <label class="form-field">
+                <span>Business Account ID</span>
+                <input name="businessId" type="text" placeholder="กรอก Business account ID" />
+              </label>
+              <label class="form-field secret-field">
+                <span>Client Key</span>
+                <div>
+                  <input name="clientKey" type="password" placeholder="กรอก Client key" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Client Key">◉</button>
+                </div>
+              </label>
+              <label class="form-field secret-field">
+                <span>Client Secret</span>
+                <div>
+                  <input name="clientSecret" type="password" placeholder="กรอก Client secret" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Client Secret">◉</button>
+                </div>
+              </label>
+              <div class="integration-actions">
+                <button class="save-config" type="button">บันทึก</button>
+                <button class="test-config" type="button">ทดสอบ</button>
+                <button class="clear-config" type="button">ล้างค่า</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
