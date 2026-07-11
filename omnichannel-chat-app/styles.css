@@ -302,6 +302,12 @@ h2 {
   transform: translateY(-1px);
 }
 
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
 .secondary-button:hover,
 .integration button:hover {
   background: #d8eeeb;
@@ -322,7 +328,38 @@ h2 {
   margin-bottom: 18px;
 }
 
+.dashboard-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dashboard-head h2 {
+  margin-bottom: 0;
+}
+
+.dashboard-updated {
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: var(--accent);
+  background: #e8f3f2;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
 .metric,
+.dashboard-card,
+.dashboard-panel,
 .conversation-panel,
 .chat-panel,
 .profile-panel,
@@ -342,6 +379,13 @@ h2 {
   padding: 18px;
 }
 
+.dashboard-card {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  min-height: 132px;
+}
+
 .metric::before {
   position: absolute;
   inset: 0 auto 0 0;
@@ -354,21 +398,157 @@ h2 {
   background: var(--accent-2);
 }
 
+.dashboard-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--accent);
+  content: "";
+}
+
+.dashboard-card.accent::before {
+  background: #24425f;
+}
+
+.dashboard-card.warning::before {
+  background: #d58b00;
+}
+
+.dashboard-card.success::before {
+  background: #0e8a54;
+}
+
 .metric span,
-.metric small {
+.metric small,
+.dashboard-card span,
+.dashboard-card small {
   display: block;
   color: var(--muted);
 }
 
-.metric span {
+.metric span,
+.dashboard-card span {
   font-weight: 700;
 }
 
-.metric strong {
+.metric strong,
+.dashboard-card strong {
   display: block;
   margin: 8px 0 2px;
   font-size: 32px;
   line-height: 1;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.dashboard-panel {
+  overflow: hidden;
+}
+
+.panel-head.compact {
+  padding: 16px 18px;
+}
+
+.channel-breakdown,
+.dashboard-action-list {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.channel-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(160px, 1.1fr) 44px;
+  gap: 12px;
+  align-items: center;
+}
+
+.channel-row > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.channel-row small {
+  color: var(--muted);
+  font-weight: 800;
+  text-align: right;
+}
+
+.channel-meter {
+  overflow: hidden;
+  height: 10px;
+  border-radius: 999px;
+  background: #edf3f4;
+}
+
+.channel-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.dashboard-action {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  min-height: 72px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+  text-align: left;
+}
+
+.dashboard-action:hover {
+  background: #f8fbfb;
+}
+
+.dashboard-action strong,
+.dashboard-action span {
+  display: block;
+}
+
+.dashboard-action span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.dashboard-action small {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #0e5c39;
+  background: #dff6ea;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.dashboard-action small.watch {
+  color: #704900;
+  background: #fff3cf;
+}
+
+.dashboard-action small.urgent {
+  color: #8f220f;
+  background: #ffe2dc;
+}
+
+.dashboard-empty {
+  margin: 0;
+  padding: 18px;
+  color: var(--muted);
+  text-align: center;
 }
 
 .inbox-layout {
@@ -1404,8 +1584,13 @@ tbody tr:last-child td {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 
-  .metrics-grid {
+  .metrics-grid,
+  .dashboard-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
   }
 
 }
@@ -1436,6 +1621,7 @@ tbody tr:last-child td {
   .topbar,
   .top-actions,
   .panel-head,
+  .dashboard-head,
   .customer-actions,
   .workflow-header,
   .settings-head,
@@ -1453,11 +1639,26 @@ tbody tr:last-child td {
   }
 
   .metrics-grid,
+  .dashboard-grid,
+  .dashboard-layout,
   .inbox-layout,
   .workflow-grid,
   .accounts-grid,
   .settings-grid {
     grid-template-columns: 1fr;
+  }
+
+  .channel-row {
+    grid-template-columns: 1fr;
+  }
+
+  .channel-row small {
+    text-align: left;
+  }
+
+  .dashboard-action {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .ai-action-panel {

@@ -24,6 +24,10 @@
             <span class="icon">⌂</span>
             <span>กล่องแชท</span>
           </button>
+          <button class="nav-item" type="button" data-view="dashboard">
+            <span class="icon">▦</span>
+            <span>ดูแดชบอร์ด</span>
+          </button>
           <button class="nav-item" type="button" data-view="workflow">
             <span class="icon">↬</span>
             <span>Workflow</span>
@@ -122,6 +126,55 @@
             <aside class="profile-panel" aria-label="ข้อมูลที่เก็บจากแชท">
               <div id="profileDetail"></div>
             </aside>
+          </div>
+        </section>
+
+        <section id="dashboardView" class="view" aria-label="ดูแดชบอร์ด">
+          <div class="dashboard-head">
+            <div>
+              <p class="eyebrow">Dashboard</p>
+              <h2>ภาพรวมการดูแลแชทและลูกค้า</h2>
+            </div>
+            <span id="dashboardUpdatedAt" class="dashboard-updated">อัปเดตล่าสุด: -</span>
+          </div>
+
+          <div class="dashboard-grid" id="dashboardGrid">
+            <article class="dashboard-card">
+              <span>ลูกค้าทั้งหมด</span>
+              <strong id="dashboardTotalCustomers">0</strong>
+              <small>รวมทุกช่องทาง</small>
+            </article>
+            <article class="dashboard-card accent">
+              <span>ตอบแล้ว</span>
+              <strong id="dashboardAnsweredRate">0%</strong>
+              <small>เทียบกับแชททั้งหมด</small>
+            </article>
+            <article class="dashboard-card warning">
+              <span>รอ AI/ทีมตอบ</span>
+              <strong id="dashboardWaitingChats">0</strong>
+              <small>ต้องดูแลตาม SLA</small>
+            </article>
+            <article class="dashboard-card success">
+              <span>มีเบอร์โทรแล้ว</span>
+              <strong id="dashboardCapturedCustomers">0</strong>
+              <small>พร้อมติดตามต่อ</small>
+            </article>
+          </div>
+
+          <div class="dashboard-layout">
+            <section class="dashboard-panel" aria-label="ช่องทาง">
+              <div class="panel-head compact">
+                <h2>ช่องทางที่เข้ามา</h2>
+              </div>
+              <div id="dashboardChannelBreakdown" class="channel-breakdown"></div>
+            </section>
+
+            <section class="dashboard-panel" aria-label="งานที่ต้องดูแล">
+              <div class="panel-head compact">
+                <h2>งานที่ต้องดูแล</h2>
+              </div>
+              <div id="dashboardActionList" class="dashboard-action-list"></div>
+            </section>
           </div>
         </section>
 

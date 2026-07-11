@@ -1,4 +1,4 @@
-const conversations = [
+let conversations = [
   {
     id: "fb-001",
     channel: "Facebook",
@@ -95,6 +95,9 @@ const conversations = [
 ];
 
 const AI_RESPONSE_LIMIT_MINUTES = 2;
+const API_BASE_URL = window.location.origin;
+let apiBacked = false;
+let isSendingChatMessage = false;
 const fernClinicWelcomeMessage =
   "สวัสดีค่ะ Fern Clinic ยินดีต้อนรับค่ะ แอดมินได้รับข้อความแล้ว ขออนุญาตดูข้อมูลและตอบกลับโดยเร็วที่สุดนะคะ";
 
@@ -175,6 +178,13 @@ const selectAllCustomers = document.querySelector("#selectAllCustomers");
 const selectedCustomersCount = document.querySelector("#selectedCustomersCount");
 const accountsGrid = document.querySelector("#accountsGrid");
 const userAccountRows = document.querySelector("#userAccountRows");
+const dashboardTotalCustomers = document.querySelector("#dashboardTotalCustomers");
+const dashboardAnsweredRate = document.querySelector("#dashboardAnsweredRate");
+const dashboardWaitingChats = document.querySelector("#dashboardWaitingChats");
+const dashboardCapturedCustomers = document.querySelector("#dashboardCapturedCustomers");
+const dashboardUpdatedAt = document.querySelector("#dashboardUpdatedAt");
+const dashboardChannelBreakdown = document.querySelector("#dashboardChannelBreakdown");
+const dashboardActionList = document.querySelector("#dashboardActionList");
 const addUserButton = document.querySelector("#addUserButton");
 const cancelUserButton = document.querySelector("#cancelUserButton");
 const userFormPanel = document.querySelector("#userFormPanel");
@@ -276,12 +286,47 @@ function getMessageText(message) {
   return Array.isArray(message) ? message[1] : message.text;
 }
 
+async function loadConversationsFromApi() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/conversations`, {
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) {
+      throw new Error("API response was not ok");
+    }
+
+    const data = await response.json();
+    if (!Array.isArray(data.conversations)) {
+      throw new Error("API conversations payload is invalid");
+    }
+
+    conversations = data.conversations;
+    apiBacked = true;
+    if (!conversations.some((conversation) => conversation.id === selectedId)) {
+      selectedId = conversations[0]?.id;
+    }
+  } catch {
+    apiBacked = false;
+    showToast("ยังเชื่อม API ไม่ได้ ใช้ข้อมูลตัวอย่างในเครื่องก่อน");
+  }
+}
+
 function getConversationMessages(conversation) {
+  if (apiBacked) {
+    return conversation.messages || [];
+  }
   const aiReply = getStoredAiReplies()[conversation.id];
   return aiReply ? [...conversation.messages, aiReply] : conversation.messages;
 }
 
 function getAiResponseState(conversation) {
+  if (apiBacked && conversation.aiState) {
+    const tone = conversation.aiState.overdue ? "urgent" : conversation.aiState.waiting ? "watch" : "done";
+    const dueIn = Math.max(AI_RESPONSE_LIMIT_MINUTES - (conversation.aiState.waitingMinutes || 0), 0);
+    return { ...conversation.aiState, tone, dueIn };
+  }
+
   const messages = getConversationMessages(conversation);
   const lastMessage = messages[messages.length - 1];
   const hasAiReply = Boolean(getStoredAiReplies()[conversation.id]);
@@ -397,9 +442,77 @@ function renderMetrics() {
   const follow = conversations.filter((item) => item.status !== "ปิดการขาย").length;
   const aiPending = conversations.filter((item) => getAiResponseState(item).waiting).length;
   document.querySelector("#newChatsMetric").textContent = conversations.length;
-  document.querySelector("#capturedMetric").textContent = `${Math.round((captured / conversations.length) * 100)}%`;
+  document.querySelector("#capturedMetric").textContent = `${conversations.length ? Math.round((captured / conversations.length) * 100) : 0}%`;
   document.querySelector("#followMetric").textContent = follow;
   document.querySelector("#aiPendingMetric").textContent = aiPending;
+}
+
+function renderDashboard() {
+  const total = conversations.length;
+  const captured = conversations.filter((item) => item.phone !== "-").length;
+  const waiting = conversations.filter((item) => getAiResponseState(item).waiting).length;
+  const answered = total - waiting;
+  const answeredRate = total ? Math.round((answered / total) * 100) : 0;
+  const channelCounts = conversations.reduce((counts, item) => {
+    counts[item.channel] = (counts[item.channel] || 0) + 1;
+    return counts;
+  }, {});
+  const actionItems = conversations
+    .filter((item) => getAiResponseState(item).waiting || item.status !== "ปิดการขาย")
+    .sort((a, b) => (b.waitingMinutes || 0) - (a.waitingMinutes || 0))
+    .slice(0, 5);
+
+  dashboardTotalCustomers.textContent = total;
+  dashboardAnsweredRate.textContent = `${answeredRate}%`;
+  dashboardWaitingChats.textContent = waiting;
+  dashboardCapturedCustomers.textContent = captured;
+  dashboardUpdatedAt.textContent = `อัปเดตล่าสุด: ${new Date().toLocaleTimeString("th-TH", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
+
+  dashboardChannelBreakdown.innerHTML = ["Facebook", "LINE", "TikTok"]
+    .map((channel) => {
+      const count = channelCounts[channel] || 0;
+      const percent = total ? Math.round((count / total) * 100) : 0;
+      return `
+        <div class="channel-row">
+          <div>
+            <span class="badge ${channel}">${channel}</span>
+            <strong>${count} แชท</strong>
+          </div>
+          <div class="channel-meter" aria-label="${channel} ${percent}%">
+            <span style="width: ${percent}%"></span>
+          </div>
+          <small>${percent}%</small>
+        </div>
+      `;
+    })
+    .join("");
+
+  dashboardActionList.innerHTML =
+    actionItems
+      .map((item) => {
+        const aiState = getAiResponseState(item);
+        return `
+        <button class="dashboard-action" type="button" data-customer-id="${item.id}">
+          <div>
+            <strong>${escapeHtml(item.name)}</strong>
+            <span>${escapeHtml(item.interest)} · ${escapeHtml(item.status)}</span>
+          </div>
+          <small class="${aiState.tone}">${escapeHtml(aiState.label)}</small>
+        </button>
+      `;
+      })
+      .join("") || `<p class="dashboard-empty">ยังไม่มีงานที่ต้องดูแลตอนนี้</p>`;
+
+  dashboardActionList.querySelectorAll(".dashboard-action").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedId = button.dataset.customerId;
+      document.querySelector('[data-view="inbox"]').click();
+      renderAll();
+    });
+  });
 }
 
 function renderConversations() {
@@ -450,10 +563,10 @@ function renderChat() {
         .map((message, index) => renderChatMessage(item, message, index))
         .join("")}
     </div>
-    <div class="composer">
-      <input type="text" placeholder="พิมพ์ข้อความตอบกลับหรือบันทึกโน้ต" />
-      <button class="primary-button" type="button">ส่ง</button>
-    </div>
+    <form id="chatComposerForm" class="composer" data-customer-id="${item.id}">
+      <input id="chatComposerInput" type="text" placeholder="พิมพ์ข้อความตอบกลับหรือบันทึกโน้ต" />
+      <button id="sendChatButton" class="primary-button" type="submit">ส่ง</button>
+    </form>
   `;
 
   chatDetail.querySelectorAll(".save-chat-slip").forEach((button) => {
@@ -469,6 +582,9 @@ function renderChat() {
   chatDetail.querySelectorAll(".send-ai-welcome").forEach((button) => {
     button.addEventListener("click", () => sendAiWelcomeReply(button.dataset.customerId));
   });
+
+  const composerForm = chatDetail.querySelector("#chatComposerForm");
+  composerForm?.addEventListener("submit", handleChatComposerSubmit);
 }
 
 function renderAiResponsePanel(conversation) {
@@ -514,6 +630,7 @@ function renderAiResponsePanel(conversation) {
 function renderChatMessage(conversation, message, index) {
   const role = getMessageRole(message);
   const text = getMessageText(message);
+  const safeText = escapeHtml(text);
   const attachment = Array.isArray(message) ? null : message.attachment;
   const slipSaved = Boolean(getStoredSlips()[conversation.id]);
   const patientPhotoKey = `${conversation.id}-${index}`;
@@ -522,7 +639,7 @@ function renderChatMessage(conversation, message, index) {
   return `
     <div class="message ${role === "agent" ? "agent" : ""} ${message.automated ? "automated" : ""}">
       ${message.automated ? `<small class="auto-reply-label">AI Auto Reply</small>` : ""}
-      <span>${text}</span>
+      <span>${safeText}</span>
       ${
         attachment?.kind === "payment-slip"
           ? `
@@ -834,11 +951,37 @@ function classifyPatientPhoto(customerId, messageIndex, stage) {
   showToast(`แยกรูปเป็น${stage === "before" ? "ก่อนทำ" : "หลังทำ"}แล้ว`);
 }
 
-function sendAiWelcomeReply(customerId) {
+async function sendAiWelcomeReply(customerId) {
   const conversation = conversations.find((item) => item.id === customerId);
   if (!conversation) {
     showToast("ไม่พบห้องแชทนี้");
     return;
+  }
+
+  if (apiBacked) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/ai/welcome`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId: customerId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("AI welcome API failed");
+      }
+
+      await loadConversationsFromApi();
+      renderMetrics();
+      renderDashboard();
+      renderConversations();
+      renderChat();
+      renderProfile();
+      showToast("AI ส่งข้อความต้อนรับ Fern Clinic ผ่าน API แล้ว");
+      return;
+    } catch {
+      showToast("ส่งผ่าน API ไม่สำเร็จ ใช้การบันทึกในเครื่องแทน");
+      apiBacked = false;
+    }
   }
 
   const replies = getStoredAiReplies();
@@ -851,10 +994,82 @@ function sendAiWelcomeReply(customerId) {
   };
   saveStoredAiReplies(replies);
   renderMetrics();
+  renderDashboard();
   renderConversations();
   renderChat();
   renderProfile();
   showToast("AI ส่งข้อความต้อนรับเฟิร์นคลีนิคแล้ว");
+}
+
+async function sendChatMessage(customerId, text) {
+  const messageText = text.trim();
+  if (!messageText) {
+    showToast("พิมพ์ข้อความก่อนกดส่ง");
+    return;
+  }
+
+  if (isSendingChatMessage) {
+    return;
+  }
+
+  const conversation = conversations.find((item) => item.id === customerId);
+  if (!conversation) {
+    showToast("ไม่พบห้องแชทนี้");
+    return;
+  }
+
+  isSendingChatMessage = true;
+  const composerForm = chatDetail.querySelector("#chatComposerForm");
+  const sendButton = composerForm?.querySelector("#sendChatButton");
+  const composerInput = composerForm?.querySelector("#chatComposerInput");
+  if (sendButton) {
+    sendButton.disabled = true;
+    sendButton.textContent = "กำลังส่ง";
+  }
+  if (composerInput) {
+    composerInput.value = "";
+  }
+
+  conversation.messages.push({
+    role: "agent",
+    text: messageText,
+    sentAt: new Date().toISOString(),
+    sentAtLabel: "ตอนนี้",
+  });
+  conversation.waitingMinutes = 0;
+
+  const replies = getStoredAiReplies();
+  if (replies[customerId]) {
+    delete replies[customerId];
+    saveStoredAiReplies(replies);
+  }
+
+  if (apiBacked) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/conversations/${encodeURIComponent(customerId)}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: "agent", text: messageText }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Send message API failed");
+      }
+
+      await loadConversationsFromApi();
+      renderAll();
+      showToast("ส่งข้อความแล้ว");
+      isSendingChatMessage = false;
+      return;
+    } catch {
+      showToast("ส่งข้อความบนหน้าเว็บแล้ว แต่ API ยังไม่ตอบกลับ");
+      apiBacked = false;
+    }
+  }
+
+  renderAll();
+  isSendingChatMessage = false;
+  showToast("ส่งข้อความแล้ว");
 }
 
 function viewSlip(customerId) {
@@ -967,6 +1182,7 @@ function setupChannelSettings() {
 
 function renderAll() {
   renderMetrics();
+  renderDashboard();
   renderConversations();
   renderChat();
   renderProfile();
@@ -1014,6 +1230,29 @@ selectAllCustomers.addEventListener("change", () => {
 });
 
 searchInput.addEventListener("input", renderConversations);
+
+function submitChatComposer(form) {
+  if (!form) {
+    showToast("ไม่พบฟอร์มส่งข้อความ");
+    return;
+  }
+
+  const composerInput = form.querySelector("#chatComposerInput");
+  if (!composerInput) {
+    showToast("ไม่พบช่องพิมพ์ข้อความ");
+    return;
+  }
+
+  sendChatMessage(form.dataset.customerId, composerInput.value);
+}
+
+function handleChatComposerSubmit(event) {
+  event.preventDefault();
+  submitChatComposer(event.currentTarget);
+  return false;
+}
+
+window.handleChatComposerSubmit = handleChatComposerSubmit;
 
 document.querySelector("#syncButton").addEventListener("click", () => {
   const configs = getStoredConfigs();
@@ -1133,4 +1372,10 @@ userAccountForm.addEventListener("submit", (event) => {
 
 setupChannelSettings();
 loadChannelSettings();
-renderAll();
+
+async function initializeApp() {
+  await loadConversationsFromApi();
+  renderAll();
+}
+
+initializeApp();

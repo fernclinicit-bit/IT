@@ -25,6 +25,16 @@ const conversations = [
       ["customer", "สนใจโปรลดน้ำหนักค่ะ ราคาเริ่มต้นเท่าไหร่"],
       ["agent", "สวัสดีค่ะ ตอนนี้มีแพ็กเกจเริ่มต้น 2,900 บาท ขอเบอร์ติดต่อกลับได้ไหมคะ"],
       ["customer", "ได้ค่ะ 089-234-8891 อยากเริ่มสัปดาห์นี้"],
+      {
+        role: "customer",
+        text: "แนบรูปก่อนเริ่มให้ช่วยประเมินค่ะ",
+        attachment: {
+          kind: "patient-photo",
+          name: "mintra-before-photo.svg",
+          type: "image/svg+xml",
+          suggestedStage: "before",
+        },
+      },
     ],
   },
   {
@@ -43,6 +53,17 @@ const conversations = [
       ["customer", "อยากจองคิวปรึกษาผิว วันเสาร์ว่างไหมครับ"],
       ["agent", "วันเสาร์มีช่วง 11:00 และ 15:30 ค่ะ สะดวกช่วงไหนคะ"],
       ["customer", "15:30 ครับ เบอร์ 082-775-4410"],
+      {
+        role: "customer",
+        text: "โอนเงินมัดจำแล้วครับ แนบสลิปให้ตรวจสอบ",
+        attachment: {
+          kind: "payment-slip",
+          name: "line-slip-ton-1530.svg",
+          type: "image/svg+xml",
+          amount: "500.00",
+          reference: "LINE-1530-0827754410",
+        },
+      },
     ],
   },
   {
@@ -220,6 +241,41 @@ async function handleApi(req, res) {
       ok: true,
       conversationId: conversation.id,
       reply: aiReplies[conversation.id],
+    });
+    return;
+  }
+
+  const messageMatch = url.pathname.match(/^\/api\/conversations\/([^/]+)\/messages$/);
+  if (req.method === "POST" && messageMatch) {
+    const conversationId = decodeURIComponent(messageMatch[1]);
+    const body = await readJsonBody(req);
+    const conversation = conversations.find((item) => item.id === conversationId);
+
+    if (!conversation) {
+      sendJson(res, 404, { ok: false, error: "Conversation not found" });
+      return;
+    }
+
+    const text = String(body.text || "").trim();
+    if (!text) {
+      sendJson(res, 400, { ok: false, error: "message text is required" });
+      return;
+    }
+
+    const message = {
+      role: body.role === "customer" ? "customer" : "agent",
+      text,
+      sentAt: new Date().toISOString(),
+      sentAtLabel: "ตอนนี้",
+    };
+    conversation.messages.push(message);
+    conversation.waitingMinutes = 0;
+    delete aiReplies[conversation.id];
+    sendJson(res, 201, {
+      ok: true,
+      conversationId: conversation.id,
+      message,
+      aiState: getAiResponseState(conversation),
     });
     return;
   }

@@ -2,6 +2,8 @@
 
 ใช้ deploy เป็น Render Web Service ได้ด้วยคำสั่ง `npm start`
 
+หน้าเว็บจะโหลดข้อมูลแชทจาก `GET /api/conversations` และปุ่ม AI ตอบต้อนรับจะเรียก `POST /api/ai/welcome`
+
 ## Render settings
 
 - Service type: Web Service
