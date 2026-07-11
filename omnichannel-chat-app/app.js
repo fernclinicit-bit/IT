@@ -101,7 +101,7 @@ let isSendingChatMessage = false;
 const fernClinicWelcomeMessage =
   "สวัสดีค่ะ Fern Clinic ยินดีต้อนรับค่ะ แอดมินได้รับข้อความแล้ว ขออนุญาตดูข้อมูลและตอบกลับโดยเร็วที่สุดนะคะ";
 
-const workflowSteps = [
+const workflowStepsLegacy = [
   {
     title: "รับข้อความ",
     detail: "ดึงข้อความจาก webhook หรือไฟล์นำเข้า แล้วรวมเป็น conversation เดียวกันตามช่องทางและ user id",
@@ -125,6 +125,79 @@ const workflowSteps = [
   {
     title: "ส่งต่อระบบหลัก",
     detail: "บันทึกลง CRM, Google Sheets, ฐานข้อมูล หรือ API หลังบ้าน พร้อมประวัติการยินยอม",
+  },
+];
+
+const workflowSteps = [
+  {
+    title: "รับแชททุกช่องทาง",
+    category: "Capture",
+    detail: "รวมข้อความจาก Facebook, LINE, TikTok, Webhook และไฟล์นำเข้า พร้อมบันทึกแหล่งที่มา เช่น โฆษณา, Rich menu, Live หรือ Inbox direct",
+    outcome: "ทุกข้อความเข้า inbox เดียว",
+    tone: "capture",
+  },
+  {
+    title: "รวมโปรไฟล์ลูกค้า",
+    category: "Identity",
+    detail: "จับคู่ชื่อ เบอร์โทร LINE/Facebook ID และอีเมล เพื่อลดลูกค้าซ้ำข้ามช่องทางและเก็บประวัติไว้ในโปรไฟล์เดียว",
+    outcome: "เห็นประวัติลูกค้าครบคนเดียว",
+    tone: "identity",
+  },
+  {
+    title: "วิเคราะห์เจตนา",
+    category: "Intent",
+    detail: "แยกข้อความเป็นกลุ่ม เช่น ถามราคา, จองคิว, ส่งรูปประเมิน, ส่งสลิป, ติดตามผล, ร้องเรียน หรือถามข้อมูลทั่วไป",
+    outcome: "รู้ทันทีว่าลูกค้าต้องการอะไร",
+    tone: "intent",
+  },
+  {
+    title: "เก็บข้อมูลสำคัญ",
+    category: "Data",
+    detail: "ดึงชื่อ เบอร์ ความสนใจ งบประมาณ สาขา วันที่สะดวก รูปก่อน/หลังทำ และสลิป พร้อมแจ้งข้อมูลที่ยังขาด",
+    outcome: "ข้อมูลพร้อมใช้ต่อยอด",
+    tone: "data",
+  },
+  {
+    title: "ให้คะแนน Lead",
+    category: "Scoring",
+    detail: "ให้คะแนนจากความพร้อม เช่น มีเบอร์แล้ว, สนใจบริการชัดเจน, ส่งรูปแล้ว, ส่งสลิปแล้ว หรือพร้อมจองคิว",
+    outcome: "จัดลำดับลูกค้าที่ควรตอบก่อน",
+    tone: "scoring",
+  },
+  {
+    title: "AI ช่วยตอบตาม SLA",
+    category: "SLA",
+    detail: "ถ้าลูกค้ายังไม่ได้คำตอบภายในเวลาที่กำหนด ให้ AI ส่งข้อความต้อนรับ ขอข้อมูลเบื้องต้น และแจ้งเตือนทีม",
+    outcome: "ไม่ปล่อยแชทค้างเกินเวลา",
+    tone: "sla",
+  },
+  {
+    title: "มอบหมายทีมดูแล",
+    category: "Assign",
+    detail: "ส่งต่อ Sale/Admin ตามช่องทาง บริการ สาขา หรือความเร่งด่วน พร้อมสถานะ เช่น รอตอบ, รอรูป, รอสลิป, รอจองคิว",
+    outcome: "ทุกเคสมีเจ้าของงาน",
+    tone: "assign",
+  },
+  {
+    title: "ตรวจรูปและสลิป",
+    category: "Verify",
+    detail: "แยกรูปก่อนทำ/หลังทำ ตรวจหลักฐานการโอน ยอดเงิน และแนบไฟล์กลับเข้าโปรไฟล์ลูกค้าอย่างเป็นระบบ",
+    outcome: "หลักฐานครบก่อนส่งต่อ",
+    tone: "verify",
+  },
+  {
+    title: "นัดหมายและติดตามผล",
+    category: "Follow-up",
+    detail: "สร้างงานจองคิว ติดตามก่อนนัด หลังนัด และแจ้งเตือนทีมเมื่อถึงเวลาติดต่อกลับหรือปิดเคส",
+    outcome: "ไม่หลุดงานติดตาม",
+    tone: "follow",
+  },
+  {
+    title: "ส่งต่อ CRM และรายงาน",
+    category: "Sync",
+    detail: "บันทึกลง CRM, Google Sheets หรือ API พร้อมแหล่งที่มา คะแนน lead เจ้าของงาน สถานะล่าสุด และประวัติการยินยอม",
+    outcome: "พร้อมทำรายงานและวัดผล",
+    tone: "sync",
   },
 ];
 
@@ -721,11 +794,18 @@ function renderWorkflow() {
   workflowGrid.innerHTML = workflowSteps
     .map(
       (step, index) => `
-        <article class="workflow-card">
-          <span class="step-number">${index + 1}</span>
+        <article class="workflow-card ${step.tone}">
+          <div class="workflow-card-top">
+            <span class="step-number">${index + 1}</span>
+            <span class="workflow-category">${step.category}</span>
+          </div>
           <strong>${step.title}</strong>
           <p>${step.detail}</p>
-          <span class="status-pill done">พร้อมใช้งาน</span>
+          <div class="workflow-outcome">
+            <span>ผลลัพธ์</span>
+            <strong>${step.outcome}</strong>
+          </div>
+          <span class="status-pill done">พร้อมใช้ในระบบ</span>
         </article>
       `,
     )
@@ -1261,7 +1341,7 @@ document.querySelector("#syncButton").addEventListener("click", () => {
 });
 
 document.querySelector("#runWorkflowButton").addEventListener("click", () => {
-  showToast("ประมวลผล workflow: ดึงข้อมูลสำคัญ แยกรูปก่อน/หลัง และตรวจแชทที่ต้องตอบภายใน 2 นาที");
+  showToast("ตรวจ Workflow แล้ว: รวมโปรไฟล์ วิเคราะห์เจตนา ให้คะแนน lead มอบหมายทีม และติดตาม SLA พร้อมใช้งาน");
 });
 
 document.querySelector("#exportButton").addEventListener("click", () => {
