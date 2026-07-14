@@ -1438,7 +1438,21 @@ document.querySelector("#runWorkflowButton").addEventListener("click", () => {
 
 document.querySelector("#exportButton").addEventListener("click", () => {
   const slips = getStoredSlips();
-  const header = ["name", "channel", "phone", "interest", "status", "booking_amount", "slip_total", "slip_ai_status", "slip_ai_detail", "before_photos", "after_photos", "payment_slip", "owner"];
+  const header = [
+    "\u0e0a\u0e37\u0e48\u0e2d\u0e25\u0e39\u0e01\u0e04\u0e49\u0e32",
+    "\u0e0a\u0e48\u0e2d\u0e07\u0e17\u0e32\u0e07",
+    "\u0e40\u0e1a\u0e2d\u0e23\u0e4c\u0e42\u0e17\u0e23",
+    "\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e19\u0e43\u0e08",
+    "\u0e2a\u0e16\u0e32\u0e19\u0e30",
+    "\u0e22\u0e2d\u0e14\u0e08\u0e2d\u0e07",
+    "\u0e22\u0e2d\u0e14\u0e2a\u0e25\u0e34\u0e1b\u0e23\u0e27\u0e21",
+    "AI \u0e15\u0e23\u0e27\u0e08\u0e2a\u0e25\u0e34\u0e1b",
+    "\u0e23\u0e32\u0e22\u0e25\u0e30\u0e40\u0e2d\u0e35\u0e22\u0e14 AI",
+    "\u0e23\u0e39\u0e1b\u0e01\u0e48\u0e2d\u0e19\u0e17\u0e33",
+    "\u0e23\u0e39\u0e1b\u0e2b\u0e25\u0e31\u0e07\u0e17\u0e33",
+    "\u0e2a\u0e25\u0e34\u0e1b\u0e42\u0e2d\u0e19\u0e40\u0e07\u0e34\u0e19",
+    "\u0e40\u0e08\u0e49\u0e32\u0e02\u0e2d\u0e07\u0e07\u0e32\u0e19",
+  ];
   const rows = getFilteredCustomers().map((item) => {
     const photoSummary = getPatientPhotoSummary(item.id);
     const slipAudit = getSlipAudit(item);
@@ -1458,15 +1472,18 @@ document.querySelector("#exportButton").addEventListener("click", () => {
       item.owner,
     ];
   });
-  const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+  const csvBody = [header, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","))
+    .join("\r\n");
+  const csv = "\uFEFF" + csvBody;
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "omnichat-customers.csv";
+  link.download = "fern-clinic-customers-utf8.csv";
   link.click();
   URL.revokeObjectURL(url);
-  showToast("ส่งออกข้อมูลลูกค้าเป็น CSV แล้ว");
+  showToast("\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01 CSV \u0e41\u0e1a\u0e1a UTF-8 \u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a Excel \u0e41\u0e25\u0e49\u0e27");
 });
 
 addUserButton.addEventListener("click", openUserForm);
