@@ -8,6 +8,7 @@ let conversations = [
     status: "ต้องติดตาม",
     phone: "089-234-8891",
     interest: "คอร์สลดน้ำหนัก",
+    bookingAmount: 2900,
     sourcePost: "โฆษณาโปรเดือนนี้",
     score: 86,
     waitingMinutes: 4,
@@ -36,6 +37,7 @@ let conversations = [
     status: "จองคิว",
     phone: "082-775-4410",
     interest: "ปรึกษาผิวหน้า",
+    bookingAmount: 500,
     sourcePost: "Rich menu",
     score: 91,
     waitingMinutes: 7,
@@ -65,6 +67,7 @@ let conversations = [
     status: "รอคัดกรอง",
     phone: "-",
     interest: "รีวิวสินค้า",
+    bookingAmount: 0,
     sourcePost: "Live comment",
     score: 54,
     waitingMinutes: 3,
@@ -83,6 +86,7 @@ let conversations = [
     status: "ปิดการขาย",
     phone: "086-112-9088",
     interest: "แพ็กเกจตรวจสุขภาพ",
+    bookingAmount: 0,
     sourcePost: "Inbox direct",
     score: 78,
     waitingMinutes: 0,
@@ -255,6 +259,9 @@ const dashboardTotalCustomers = document.querySelector("#dashboardTotalCustomers
 const dashboardAnsweredRate = document.querySelector("#dashboardAnsweredRate");
 const dashboardWaitingChats = document.querySelector("#dashboardWaitingChats");
 const dashboardCapturedCustomers = document.querySelector("#dashboardCapturedCustomers");
+const dashboardBookingTotal = document.querySelector("#dashboardBookingTotal");
+const dashboardSlipTotal = document.querySelector("#dashboardSlipTotal");
+const dashboardSlipReview = document.querySelector("#dashboardSlipReview");
 const dashboardUpdatedAt = document.querySelector("#dashboardUpdatedAt");
 const dashboardChannelBreakdown = document.querySelector("#dashboardChannelBreakdown");
 const dashboardActionList = document.querySelector("#dashboardActionList");
@@ -510,6 +517,64 @@ function getFilteredCustomers() {
   return conversations.filter((item) => customerChannelFilter === "all" || item.channel === customerChannelFilter);
 }
 
+function parseMoney(value) {
+  const amount = Number(String(value ?? 0).replace(/[^\d.-]/g, ""));
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function formatBaht(value) {
+  return parseMoney(value).toLocaleString("th-TH", {
+    maximumFractionDigits: 0,
+  });
+}
+
+function getBookingAmount(customer) {
+  return parseMoney(customer.bookingAmount);
+}
+
+function getSlipRecords(customer) {
+  const storedSlip = getStoredSlips()[customer.id];
+  if (storedSlip) {
+    return [storedSlip];
+  }
+
+  return getConversationMessages(customer)
+    .filter((message) => !Array.isArray(message) && message.attachment?.kind === "payment-slip")
+    .map((message) => message.attachment);
+}
+
+function getSlipTotal(customer) {
+  return getSlipRecords(customer).reduce((total, slip) => total + parseMoney(slip.amount), 0);
+}
+
+function getSlipAudit(customer) {
+  const bookingAmount = getBookingAmount(customer);
+  const slipTotal = getSlipTotal(customer);
+  const diff = slipTotal - bookingAmount;
+
+  if (!bookingAmount && !slipTotal) {
+    return { label: "รอยอดจอง", tone: "pending", detail: "ยังไม่มียอดให้ AI ตรวจ", diff };
+  }
+
+  if (bookingAmount && !slipTotal) {
+    return { label: "รอสลิป", tone: "warning", detail: `ขาด ${formatBaht(bookingAmount)} บาท`, diff };
+  }
+
+  if (!bookingAmount && slipTotal) {
+    return { label: "ขาดยอดจอง", tone: "warning", detail: `พบสลิป ${formatBaht(slipTotal)} บาท`, diff };
+  }
+
+  if (Math.abs(diff) <= 1) {
+    return { label: "ยอดตรงกัน", tone: "match", detail: "AI ตรวจสอบผ่าน", diff };
+  }
+
+  if (diff < 0) {
+    return { label: "ยอดสลิปขาด", tone: "danger", detail: `ขาด ${formatBaht(Math.abs(diff))} บาท`, diff };
+  }
+
+  return { label: "สลิปเกินยอด", tone: "warning", detail: `เกิน ${formatBaht(diff)} บาท`, diff };
+}
+
 function renderMetrics() {
   const captured = conversations.filter((item) => item.phone !== "-").length;
   const follow = conversations.filter((item) => item.status !== "ปิดการขาย").length;
@@ -526,6 +591,12 @@ function renderDashboard() {
   const waiting = conversations.filter((item) => getAiResponseState(item).waiting).length;
   const answered = total - waiting;
   const answeredRate = total ? Math.round((answered / total) * 100) : 0;
+  const bookingTotal = conversations.reduce((sum, item) => sum + getBookingAmount(item), 0);
+  const slipTotal = conversations.reduce((sum, item) => sum + getSlipTotal(item), 0);
+  const slipReviewCount = conversations.filter((item) => {
+    const audit = getSlipAudit(item);
+    return audit.tone !== "match" && (getBookingAmount(item) || getSlipTotal(item));
+  }).length;
   const channelCounts = conversations.reduce((counts, item) => {
     counts[item.channel] = (counts[item.channel] || 0) + 1;
     return counts;
@@ -539,6 +610,15 @@ function renderDashboard() {
   dashboardAnsweredRate.textContent = `${answeredRate}%`;
   dashboardWaitingChats.textContent = waiting;
   dashboardCapturedCustomers.textContent = captured;
+  if (dashboardBookingTotal) {
+    dashboardBookingTotal.textContent = `${formatBaht(bookingTotal)} บาท`;
+  }
+  if (dashboardSlipTotal) {
+    dashboardSlipTotal.textContent = `${formatBaht(slipTotal)} บาท`;
+  }
+  if (dashboardSlipReview) {
+    dashboardSlipReview.textContent = slipReviewCount;
+  }
   dashboardUpdatedAt.textContent = `อัปเดตล่าสุด: ${new Date().toLocaleTimeString("th-TH", {
     hour: "2-digit",
     minute: "2-digit",
@@ -820,6 +900,9 @@ function renderCustomers() {
       (item) => {
         const slip = slips[item.id];
         const photoSummary = getPatientPhotoSummary(item.id);
+        const bookingAmount = getBookingAmount(item);
+        const slipTotal = getSlipTotal(item);
+        const slipAudit = getSlipAudit(item);
         return `
         <tr>
           <td class="check-cell">
@@ -830,6 +913,14 @@ function renderCustomers() {
           <td>${item.phone}</td>
           <td>${item.interest}</td>
           <td>${item.status}</td>
+          <td><strong class="money-cell">${formatBaht(bookingAmount)} บาท</strong></td>
+          <td><strong class="money-cell ${slipTotal ? "has-amount" : ""}">${formatBaht(slipTotal)} บาท</strong></td>
+          <td>
+            <div class="slip-audit ${slipAudit.tone}">
+              <strong>${slipAudit.label}</strong>
+              <span>${slipAudit.detail}</span>
+            </div>
+          </td>
           <td>
             <div class="photo-summary-cell">
               <span>ก่อนทำ ${photoSummary.before}</span>
@@ -841,6 +932,7 @@ function renderCustomers() {
             <div class="slip-cell">
               <span class="slip-state ${slip ? "has-slip" : ""}">${slip ? "มีสลิปแล้ว" : "ยังไม่มีสลิป"}</span>
               <span class="slip-name">${slip ? slip.name : "-"}</span>
+              <span class="slip-total-line">ยอดสลิปรวม ${formatBaht(slipTotal)} บาท</span>
               ${slip?.source === "chat" ? `<span class="slip-source">จากห้องแชท ${slip.sourceChannel}</span>` : ""}
               <div class="slip-actions">
                 <button class="view-slip" type="button" data-id="${item.id}" ${slip ? "" : "disabled"}>ดู</button>
@@ -855,7 +947,7 @@ function renderCustomers() {
     )
     .join("") || `
       <tr>
-        <td colspan="9" class="empty-row">ไม่พบข้อมูลลูกค้าในช่องทางนี้</td>
+        <td colspan="12" class="empty-row">ไม่พบข้อมูลลูกค้าในช่องทางนี้</td>
       </tr>
     `;
 
@@ -1346,15 +1438,20 @@ document.querySelector("#runWorkflowButton").addEventListener("click", () => {
 
 document.querySelector("#exportButton").addEventListener("click", () => {
   const slips = getStoredSlips();
-  const header = ["name", "channel", "phone", "interest", "status", "before_photos", "after_photos", "payment_slip", "owner"];
+  const header = ["name", "channel", "phone", "interest", "status", "booking_amount", "slip_total", "slip_ai_status", "slip_ai_detail", "before_photos", "after_photos", "payment_slip", "owner"];
   const rows = getFilteredCustomers().map((item) => {
     const photoSummary = getPatientPhotoSummary(item.id);
+    const slipAudit = getSlipAudit(item);
     return [
       item.name,
       item.channel,
       item.phone,
       item.interest,
       item.status,
+      getBookingAmount(item),
+      getSlipTotal(item),
+      slipAudit.label,
+      slipAudit.detail,
       photoSummary.before,
       photoSummary.after,
       slips[item.id] ? slips[item.id].name : "",

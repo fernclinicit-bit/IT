@@ -418,6 +418,18 @@ h2 {
   background: #0e8a54;
 }
 
+.dashboard-card.money::before {
+  background: #24425f;
+}
+
+.dashboard-card.slip-total::before {
+  background: #0e8a54;
+}
+
+.dashboard-card.slip-review::before {
+  background: #d58b00;
+}
+
 .metric span,
 .metric small,
 .dashboard-card span,
@@ -1201,6 +1213,66 @@ tbody tr:last-child td {
   display: grid;
   gap: 7px;
   min-width: 220px;
+}
+
+.money-cell {
+  display: inline-block;
+  min-width: 86px;
+  color: #17212b;
+  font-variant-numeric: tabular-nums;
+}
+
+.money-cell.has-amount {
+  color: #0e5c39;
+}
+
+.slip-audit {
+  display: grid;
+  gap: 3px;
+  min-width: 150px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #f5f8fa;
+}
+
+.slip-audit strong,
+.slip-audit span {
+  display: block;
+}
+
+.slip-audit strong {
+  font-size: 12px;
+}
+
+.slip-audit span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.slip-audit.match {
+  color: #0e5c39;
+  background: #dff6ea;
+}
+
+.slip-audit.warning,
+.slip-audit.pending {
+  color: #704900;
+  background: #fff3cf;
+}
+
+.slip-audit.danger {
+  color: #8f220f;
+  background: #ffe2dc;
+}
+
+.slip-total-line {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #0e5c39;
+  background: #dff6ea;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .photo-summary-cell {
