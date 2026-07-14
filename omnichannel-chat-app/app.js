@@ -1472,18 +1472,30 @@ document.querySelector("#exportButton").addEventListener("click", () => {
       item.owner,
     ];
   });
-  const csvBody = [header, ...rows]
-    .map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","))
-    .join("\r\n");
-  const csv = "\uFEFF" + csvBody;
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const escapeCell = (cell) => String(cell ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+  const tableRows = [header, ...rows]
+    .map((row, index) => {
+      const open = index === 0 ? "<th>" : "<td>";
+      const close = index === 0 ? "</th>" : "</td>";
+      return "<tr>" + row.map((cell) => open + escapeCell(cell) + close).join("") + "</tr>";
+    })
+    .join("");
+  const excelHtml = "<!doctype html>" +
+    "<html><head><meta charset=\"UTF-8\" />" +
+    "<style>table{border-collapse:collapse;font-family:Tahoma,Arial,sans-serif;font-size:12pt;}th{background:#dff6ea;font-weight:700;}th,td{border:1px solid #9ca3af;padding:6px 10px;mso-number-format:\"\\@\";}</style>" +
+    "</head><body><table>" + tableRows + "</table></body></html>";
+  const blob = new Blob(["\uFEFF", excelHtml], { type: "application/vnd.ms-excel;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "fern-clinic-customers-utf8.csv";
+  link.download = "fern-clinic-customer-report.xls";
   link.click();
   URL.revokeObjectURL(url);
-  showToast("\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01 CSV \u0e41\u0e1a\u0e1a UTF-8 \u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a Excel \u0e41\u0e25\u0e49\u0e27");
+  showToast("\u0e2a\u0e48\u0e07\u0e2d\u0e2d\u0e01\u0e23\u0e35\u0e1e\u0e2d\u0e23\u0e4c\u0e15 Excel \u0e20\u0e32\u0e29\u0e32\u0e44\u0e17\u0e22\u0e1e\u0e23\u0e49\u0e2d\u0e21\u0e43\u0e0a\u0e49\u0e41\u0e25\u0e49\u0e27");
 });
 
 addUserButton.addEventListener("click", openUserForm);
