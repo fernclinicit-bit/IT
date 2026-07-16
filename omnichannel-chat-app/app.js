@@ -2103,41 +2103,6 @@ function renderCrmProfile() {
       </div>
     </div>
     <div class="profile-section">
-      <h3>ข้อมูลการจองคิว</h3>
-      <div class="field-list">
-        <div class="field">
-          <span>แพทย์ที่จอง</span>
-          <input type="text" id="crm-tab-input-booking-doctor" value="${escapeHtml(item.bookingDoctor || '')}" />
-        </div>
-        <div class="field">
-          <span>วันเวลาจองคิว</span>
-          <input type="text" id="crm-tab-input-booking-date" value="${escapeHtml(item.bookingDate || '')}" placeholder="เช่น 25 กรกฎาคม 69 เวลา 10.00 น." />
-        </div>
-        <div class="field">
-          <span>โรคประจำตัว</span>
-          <input type="text" id="crm-tab-input-underlying-disease" value="${escapeHtml(item.underlyingDisease || '')}" />
-        </div>
-        <div class="field">
-          <span>ประวัติแพ้ยา</span>
-          <input type="text" id="crm-tab-input-drug-allergy" value="${escapeHtml(item.drugAllergy || '')}" />
-        </div>
-        <div class="field">
-          <span>ราคาเคส (บาท)</span>
-          <input type="number" id="crm-tab-input-case-price" min="0" value="${item.casePrice || 0}" />
-        </div>
-        <div class="field">
-          <span>เงินมัดจำ (บาท)</span>
-          <input type="number" id="crm-tab-input-booking-amount" min="0" value="${item.bookingAmount || 0}" />
-        </div>
-        <div class="field">
-          <span>ยอดชำระวันทำ</span>
-          <strong style="color: var(--accent); font-size: 15px;">
-            ${((item.casePrice || 0) - (item.bookingAmount || 0)).toLocaleString()} บาท
-          </strong>
-        </div>
-      </div>
-    </div>
-    <div class="profile-section">
       <h3>AI ตอบแชท</h3>
       <div class="field-list">
         <div class="field"><span>SLA</span><strong>ไม่เกิน ${AI_RESPONSE_LIMIT_MINUTES} นาที</strong></div>
@@ -2178,12 +2143,12 @@ window.saveActiveCustomerCrmFromTab = async function() {
   const status = document.getElementById('crm-tab-input-status').value;
   const owner = document.getElementById('crm-tab-input-assignee').value;
 
-  const bookingDoctor = document.getElementById('crm-tab-input-booking-doctor').value;
-  const bookingDate = document.getElementById('crm-tab-input-booking-date').value;
-  const underlyingDisease = document.getElementById('crm-tab-input-underlying-disease').value;
-  const drugAllergy = document.getElementById('crm-tab-input-drug-allergy').value;
-  const casePrice = parseInt(document.getElementById('crm-tab-input-case-price').value) || 0;
-  const bookingAmount = parseInt(document.getElementById('crm-tab-input-booking-amount').value) || 0;
+  const bookingDoctor = document.getElementById('crm-tab-input-booking-doctor')?.value ?? (conversation.bookingDoctor || '');
+  const bookingDate = document.getElementById('crm-tab-input-booking-date')?.value ?? (conversation.bookingDate || '');
+  const underlyingDisease = document.getElementById('crm-tab-input-underlying-disease')?.value ?? (conversation.underlyingDisease || '');
+  const drugAllergy = document.getElementById('crm-tab-input-drug-allergy')?.value ?? (conversation.drugAllergy || '');
+  const casePrice = document.getElementById('crm-tab-input-case-price') ? parseInt(document.getElementById('crm-tab-input-case-price').value) || 0 : (conversation.casePrice || 0);
+  const bookingAmount = document.getElementById('crm-tab-input-booking-amount') ? parseInt(document.getElementById('crm-tab-input-booking-amount').value) || 0 : (conversation.bookingAmount || 0);
   
   const before_img_count = parseInt(document.getElementById('crm-tab-input-before').value) || 0;
   const after_img_count = parseInt(document.getElementById('crm-tab-input-after').value) || 0;
