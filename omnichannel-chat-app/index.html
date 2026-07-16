@@ -20,10 +20,16 @@
         </div>
 
         <nav class="nav-list">
-          <button class="nav-item active" type="button" data-view="inbox">
-            <span class="icon">⌂</span>
-            <span>ระบบ Admin</span>
-          </button>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <button class="nav-item active" type="button" data-view="inbox">
+              <span class="icon">⌂</span>
+              <span>ระบบ Admin</span>
+            </button>
+            <button class="nav-item sub-nav-item" type="button" data-view="adminInfo" style="padding-left: 36px; min-height: 36px; font-size: 13px; opacity: 0.85;">
+              <span class="icon" style="font-size: 12px; width: 20px; height: 20px; color: #f2c94c;">📄</span>
+              <span>ข้อมูล</span>
+            </button>
+          </div>
           <button class="nav-item" type="button" data-view="crm">
             <span class="icon">⚇</span>
             <span>ระบบ CRM</span>
@@ -130,6 +136,87 @@
             <aside class="profile-panel" aria-label="ข้อมูลที่เก็บจากแชท">
               <div id="profileDetail"></div>
             </aside>
+          </div>
+        </section>
+
+        <!-- ข้อมูล ระบบ Admin View -->
+        <section id="adminInfoView" class="view" aria-label="ข้อมูล ระบบ Admin" style="padding: 24px;">
+          <div class="dashboard-head" style="margin-bottom: 24px;">
+            <div>
+              <p class="eyebrow" style="text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--muted); font-weight: 700; margin-bottom: 4px;">Admin System Info</p>
+              <h2 style="font-size: 24px; color: var(--text); font-weight: 800; margin: 0;">ข้อมูล ระบบ Admin</h2>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <!-- ข้อมูลระบบ -->
+            <article style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-soft);">
+              <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--accent);">⚙</span> ข้อมูลระบบ
+              </h3>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">ชื่อระบบ:</span>
+                  <strong style="color: var(--text);">Fern Clinic Unified Inbox</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">เวอร์ชั่น:</span>
+                  <strong style="color: var(--text);">1.2.0 (Active)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">สถานะเซิร์ฟเวอร์:</span>
+                  <strong style="color: var(--success); display: flex; align-items: center; gap: 4px;">
+                    <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span> ออนไลน์
+                  </strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">พอร์ตที่ใช้งาน:</span>
+                  <strong style="color: var(--text);">3000</strong>
+                </div>
+              </div>
+            </article>
+
+            <!-- ข้อมูลช่องทางเชื่อมต่อ -->
+            <article style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-soft);">
+              <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--accent);">🔌</span> สถานะช่องทางเชื่อมต่อ
+              </h3>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">Facebook Messenger:</span>
+                  <strong style="color: var(--success);">เชื่อมต่อแล้ว</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">LINE Official Account:</span>
+                  <strong style="color: var(--success);">เชื่อมต่อแล้ว</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">TikTok API:</span>
+                  <strong style="color: var(--warning);">รอเชื่อมต่อ API</strong>
+                </div>
+              </div>
+            </article>
+
+            <!-- การตั้งค่า AI -->
+            <article style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-soft);">
+              <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--accent);">🤖</span> ระบบ AI อัจฉริยะ
+              </h3>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">โมเดล AI:</span>
+                  <strong style="color: var(--text);">Gemini 1.5 Pro (Custom)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">SLA การตอบกลับ:</span>
+                  <strong style="color: var(--text);">ภายใน 2 นาที</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--muted);">อัตราการทำงาน:</span>
+                  <strong style="color: var(--success);">98.4% (ปกติ)</strong>
+                </div>
+              </div>
+            </article>
           </div>
         </section>
 
