@@ -915,22 +915,7 @@ function renderProfile() {
             <option value="เคสแก้" ${item.sourcePost === 'เคสแก้' ? 'selected' : ''}>เคสแก้</option>
           </select>
         </div>
-        <div class="field">
-          <span>แพทย์</span>
-          <select id="crm-input-doctor">
-            <option value="" ${!item.doctor ? 'selected' : ''}>-- เลือกแพทย์ --</option>
-            <option value="หมอเฟิร์น" ${item.doctor === 'หมอเฟิร์น' ? 'selected' : ''}>หมอเฟิร์น</option>
-            <option value="หมอฟาง" ${item.doctor === 'หมอฟาง' ? 'selected' : ''}>หมอฟาง</option>
-            <option value="หมอวุ้นเส้น" ${item.doctor === 'หมอวุ้นเส้น' ? 'selected' : ''}>หมอวุ้นเส้น</option>
-            <option value="หมอเชาว์" ${item.doctor === 'หมอเชาว์' ? 'selected' : ''}>หมอเชาว์</option>
-            <option value="หมอเจได" ${item.doctor === 'หมอเจได' ? 'selected' : ''}>หมอเจได</option>
-            <option value="หมอปาล์ม" ${item.doctor === 'หมอปาล์ม' ? 'selected' : ''}>หมอปาล์ม</option>
-            <option value="หมอพัน" ${item.doctor === 'หมอพัน' ? 'selected' : ''}>หมอพัน</option>
-            <option value="หมออายตา" ${item.doctor === 'หมออายตา' ? 'selected' : ''}>หมออายตา</option>
-            <option value="หมอวินนี่" ${item.doctor === 'หมอวินนี่' ? 'selected' : ''}>หมอวินนี่</option>
-            <option value="หมอไอริน" ${item.doctor === 'หมอไอริน' ? 'selected' : ''}>หมอไอริน</option>
-          </select>
-        </div>
+
       </div>
     </div>
     <div class="profile-section">
@@ -986,7 +971,19 @@ function renderProfile() {
       <div class="field-list">
         <div class="field">
           <span>แพทย์ที่จอง</span>
-          <input type="text" id="crm-input-booking-doctor" value="${escapeHtml(item.bookingDoctor || '')}" />
+          <select id="crm-input-booking-doctor">
+            <option value="" ${!item.bookingDoctor ? 'selected' : ''}>-- เลือกแพทย์ --</option>
+            <option value="หมอเฟิร์น" ${item.bookingDoctor === 'หมอเฟิร์น' ? 'selected' : ''}>หมอเฟิร์น</option>
+            <option value="หมอฟาง" ${item.bookingDoctor === 'หมอฟาง' ? 'selected' : ''}>หมอฟาง</option>
+            <option value="หมอวุ้นเส้น" ${item.bookingDoctor === 'หมอวุ้นเส้น' ? 'selected' : ''}>หมอวุ้นเส้น</option>
+            <option value="หมอเชาว์" ${item.bookingDoctor === 'หมอเชาว์' ? 'selected' : ''}>หมอเชาว์</option>
+            <option value="หมอเจได" ${item.bookingDoctor === 'หมอเจได' ? 'selected' : ''}>หมอเจได</option>
+            <option value="หมอปาล์ม" ${item.bookingDoctor === 'หมอปาล์ม' ? 'selected' : ''}>หมอปาล์ม</option>
+            <option value="หมอพัน" ${item.bookingDoctor === 'หมอพัน' ? 'selected' : ''}>หมอพัน</option>
+            <option value="หมออายตา" ${item.bookingDoctor === 'หมออายตา' ? 'selected' : ''}>หมออายตา</option>
+            <option value="หมอวินนี่" ${item.bookingDoctor === 'หมอวินนี่' ? 'selected' : ''}>หมอวินนี่</option>
+            <option value="หมอไอริน" ${item.bookingDoctor === 'หมอไอริน' ? 'selected' : ''}>หมอไอริน</option>
+          </select>
         </div>
         <div class="field">
           <span>วันเวลาจองคิว</span>
@@ -1771,7 +1768,6 @@ async function saveActiveCustomerCrm() {
   const phone = document.getElementById('crm-input-phone').value;
   const interest = document.getElementById('crm-input-interest').value;
   const sourcePost = document.getElementById('crm-input-source').value;
-  const doctor = document.getElementById('crm-input-doctor').value;
   const score = parseInt(document.getElementById('crm-input-score').value) || 0;
   const status = document.getElementById('crm-input-status').value;
   const photoDelivery = document.getElementById('crm-input-photo-delivery').value;
@@ -1779,6 +1775,7 @@ async function saveActiveCustomerCrm() {
   const owner = document.getElementById('crm-input-assignee').value;
 
   const bookingDoctor = document.getElementById('crm-input-booking-doctor').value;
+  const doctor = bookingDoctor;
   const bookingDate = document.getElementById('crm-input-booking-date').value;
   const underlyingDisease = document.getElementById('crm-input-underlying-disease').value;
   const drugAllergy = document.getElementById('crm-input-drug-allergy').value;
@@ -1869,10 +1866,9 @@ window.openCrmEditModal = function(customerId) {
   document.getElementById('crm-edit-status').value = customer.status || '1-7 วัน';
   document.getElementById('crm-edit-photo-delivery').value = customer.photoDelivery || '';
   document.getElementById('crm-edit-assignee').value = customer.owner || 'Unassigned';
-  document.getElementById('crm-edit-doctor').value = customer.doctor || '';
   document.getElementById('crm-edit-period').value = customer.period || '';
 
-  document.getElementById('crm-edit-booking-doctor').value = customer.bookingDoctor || '';
+  document.getElementById('crm-edit-booking-doctor').value = customer.bookingDoctor || customer.doctor || '';
   document.getElementById('crm-edit-booking-date').value = customer.bookingDate || '';
   document.getElementById('crm-edit-underlying-disease').value = customer.underlyingDisease || '';
   document.getElementById('crm-edit-drug-allergy').value = customer.drugAllergy || '';
@@ -1926,7 +1922,7 @@ document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => 
     photoDelivery: document.getElementById('crm-edit-photo-delivery').value,
     period: document.getElementById('crm-edit-period').value,
     owner: document.getElementById('crm-edit-assignee').value,
-    doctor: document.getElementById('crm-edit-doctor').value,
+    doctor: document.getElementById('crm-edit-booking-doctor').value,
     bookingDoctor: document.getElementById('crm-edit-booking-doctor').value,
     bookingDate: document.getElementById('crm-edit-booking-date').value,
     underlyingDisease: document.getElementById('crm-edit-underlying-disease').value,
@@ -2145,22 +2141,7 @@ function renderCrmProfile() {
             <option value="เคสแก้" ${item.sourcePost === 'เคสแก้' ? 'selected' : ''}>เคสแก้</option>
           </select>
         </div>
-        <div class="field">
-          <span>แพทย์</span>
-          <select id="crm-tab-input-doctor">
-            <option value="" ${!item.doctor ? 'selected' : ''}>-- เลือกแพทย์ --</option>
-            <option value="หมอเฟิร์น" ${item.doctor === 'หมอเฟิร์น' ? 'selected' : ''}>หมอเฟิร์น</option>
-            <option value="หมอฟาง" ${item.doctor === 'หมอฟาง' ? 'selected' : ''}>หมอฟาง</option>
-            <option value="หมอวุ้นเส้น" ${item.doctor === 'หมอวุ้นเส้น' ? 'selected' : ''}>หมอวุ้นเส้น</option>
-            <option value="หมอเชาว์" ${item.doctor === 'หมอเชาว์' ? 'selected' : ''}>หมอเชาว์</option>
-            <option value="หมอเจได" ${item.doctor === 'หมอเจได' ? 'selected' : ''}>หมอเจได</option>
-            <option value="หมอปาล์ม" ${item.doctor === 'หมอปาล์ม' ? 'selected' : ''}>หมอปาล์ม</option>
-            <option value="หมอพัน" ${item.doctor === 'หมอพัน' ? 'selected' : ''}>หมอพัน</option>
-            <option value="หมออายตา" ${item.doctor === 'หมออายตา' ? 'selected' : ''}>หมออายตา</option>
-            <option value="หมอวินนี่" ${item.doctor === 'หมอวินนี่' ? 'selected' : ''}>หมอวินนี่</option>
-            <option value="หมอไอริน" ${item.doctor === 'หมอไอริน' ? 'selected' : ''}>หมอไอริน</option>
-          </select>
-        </div>
+
       </div>
     </div>
     <div class="profile-section">
