@@ -234,7 +234,7 @@ const defaultUserAccounts = [
 
 const channelConfigFields = {
   facebook: ["pageId", "accessToken", "verifyToken"],
-  line: ["channelId", "channelSecret", "accessToken"],
+  line: ["channelId", "channelSecret", "accessToken", "channelId2", "channelSecret2", "accessToken2"],
   tiktok: ["businessId", "clientKey", "clientSecret"],
 };
 
@@ -1365,6 +1365,9 @@ function getPlatformConfig(card) {
 }
 
 function isConfigComplete(platform, config) {
+  if (platform === "line") {
+    return Boolean(config.channelId && config.channelSecret && config.accessToken);
+  }
   return channelConfigFields[platform].every((fieldName) => Boolean(config[fieldName]));
 }
 

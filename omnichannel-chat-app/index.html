@@ -24,6 +24,10 @@
             <span class="icon">⌂</span>
             <span>กล่องแชท</span>
           </button>
+          <button class="nav-item" type="button" data-view="crm">
+            <span class="icon">⚇</span>
+            <span>ระบบ CRM</span>
+          </button>
           <button class="nav-item" type="button" data-view="dashboard">
             <span class="icon">▦</span>
             <span>ดูแดชบอร์ด</span>
@@ -129,6 +133,79 @@
           </div>
         </section>
 
+        <section id="crmView" class="view" aria-label="ระบบ CRM">
+          <div class="dashboard-head">
+            <div>
+              <p class="eyebrow">CRM Workspace</p>
+              <h2>ระบบบริหารความสัมพันธ์ลูกค้า (CRM Workspace)</h2>
+            </div>
+          </div>
+
+          <!-- CRM STATS GRID -->
+          <div class="metrics-grid" style="margin-bottom: 20px;">
+            <article class="metric">
+              <span>ลีดทั้งหมด</span>
+              <strong id="crmTotalLeads">0</strong>
+              <small>รวมทุกช่องทาง</small>
+            </article>
+            <article class="metric warning">
+              <span>ต้องติดตาม</span>
+              <strong id="crmActiveFollowups">0</strong>
+              <small>ต้องติดตามการรักษา</small>
+            </article>
+            <article class="metric success">
+              <span>ปิดการขายแล้ว</span>
+              <strong id="crmConvertedLeads">0</strong>
+              <small>เสร็จสิ้นความต้องการ</small>
+            </article>
+            <article class="metric overdue-sla-metric" style="border-left: 4px solid var(--accent-red, #ef4444);">
+              <span>เกินกำหนด SLA</span>
+              <strong id="crmOverdueSla">0</strong>
+              <small>แชทไม่คืบหน้า</small>
+            </article>
+          </div>
+
+          <!-- CRM FILTER BAR -->
+          <div class="crm-filters-container" style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--line);">
+            <input type="text" id="crmSearchInput" placeholder="ค้นหาชื่อลูกค้า, เบอร์โทร..." style="flex: 1; min-width: 200px; padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;" />
+            <select id="crmStatusFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea; font-family: inherit;">
+              <option value="all">สถานะทั้งหมด</option>
+              <option value="ลูกค้าใหม่">ลูกค้าใหม่</option>
+              <option value="ต้องติดตาม">ต้องติดตาม</option>
+              <option value="กำลังพิจารณา">กำลังพิจารณา</option>
+              <option value="จองคิว">จองคิว</option>
+              <option value="ปิดการขาย">ปิดการขาย</option>
+              <option value="ไม่สนใจ">ไม่สนใจ</option>
+            </select>
+            <select id="crmAssigneeFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea; font-family: inherit;">
+              <option value="all">ผู้ดูแลทั้งหมด</option>
+              <option value="Sale A">Sale A</option>
+              <option value="Sale B">Sale B</option>
+              <option value="Unassigned">ไม่มีผู้ดูแล</option>
+            </select>
+          </div>
+
+          <!-- CRM CUSTOMERS TABLE -->
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ลูกค้า</th>
+                  <th>ช่องทาง</th>
+                  <th>เบอร์โทร</th>
+                  <th>ความสนใจ</th>
+                  <th>คะแนนลีด</th>
+                  <th>ผู้ดูแล</th>
+                  <th>รูปคนไข้ (ก่อน/หลัง/รอ)</th>
+                  <th>สถานะ</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="crmCustomerRows"></tbody>
+            </table>
+          </div>
+        </section>
+
         <section id="dashboardView" class="view" aria-label="ดูแดชบอร์ด">
           <div class="dashboard-head">
             <div>
@@ -206,67 +283,18 @@
 
         <section id="customersView" class="view" aria-label="ฐานข้อมูลลูกค้า">
           <div class="panel-head">
-            <div>
-              <p class="eyebrow">Customer Database & CRM</p>
-              <h2>ข้อมูลลูกค้า & การติดตามงาน</h2>
-            </div>
+            <h2>ข้อมูลลูกค้า</h2>
             <div class="customer-actions">
               <span id="selectedCustomersCount" class="selection-count">เลือก 0 รายการ</span>
+              <div class="customer-filters" role="tablist" aria-label="ค้นหาตามช่องทาง">
+                <button class="filter-button active" type="button" data-customer-channel="all">ทั้งหมด</button>
+                <button class="filter-button" type="button" data-customer-channel="Facebook">Facebook</button>
+                <button class="filter-button" type="button" data-customer-channel="LINE">LINE</button>
+                <button class="filter-button" type="button" data-customer-channel="TikTok">TikTok</button>
+              </div>
               <button id="exportButton" class="secondary-button" type="button">ส่งออก Excel</button>
             </div>
           </div>
-
-          <!-- CRM STATS GRID -->
-          <div class="metrics-grid" style="margin-bottom: 20px;">
-            <article class="metric">
-              <span>ลีดทั้งหมด</span>
-              <strong id="crmTotalLeads">0</strong>
-              <small>รวมทุกช่องทาง</small>
-            </article>
-            <article class="metric warning">
-              <span>ต้องติดตาม</span>
-              <strong id="crmActiveFollowups">0</strong>
-              <small>ต้องติดตามการรักษา</small>
-            </article>
-            <article class="metric success">
-              <span>ปิดการขายแล้ว</span>
-              <strong id="crmConvertedLeads">0</strong>
-              <small>เสร็จสิ้นความต้องการ</small>
-            </article>
-            <article class="metric overdue-sla-metric" style="border-left: 4px solid var(--accent-red, #ef4444);">
-              <span>เกินกำหนด SLA</span>
-              <strong id="crmOverdueSla">0</strong>
-              <small>แชทไม่คืบหน้า</small>
-            </article>
-          </div>
-
-          <!-- CRM FILTER BAR -->
-          <div class="crm-filters-container" style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--line);">
-            <input type="text" id="crmSearchInput" placeholder="ค้นหาชื่อลูกค้า, เบอร์โทร..." style="flex: 1; min-width: 200px; padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;" />
-            <select id="crmStatusFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea; font-family: inherit;">
-              <option value="all">สถานะทั้งหมด</option>
-              <option value="ลูกค้าใหม่">ลูกค้าใหม่</option>
-              <option value="ต้องติดตาม">ต้องติดตาม</option>
-              <option value="กำลังพิจารณา">กำลังพิจารณา</option>
-              <option value="จองคิว">จองคิว</option>
-              <option value="ปิดการขาย">ปิดการขาย</option>
-              <option value="ไม่สนใจ">ไม่สนใจ</option>
-            </select>
-            <select id="crmAssigneeFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea; font-family: inherit;">
-              <option value="all">ผู้ดูแลทั้งหมด</option>
-              <option value="Sale A">Sale A</option>
-              <option value="Sale B">Sale B</option>
-              <option value="Unassigned">ไม่มีผู้ดูแล</option>
-            </select>
-            <div class="customer-filters" role="tablist" aria-label="ค้นหาตามช่องทาง">
-              <button class="filter-button active" type="button" data-customer-channel="all">ทั้งหมด</button>
-              <button class="filter-button" type="button" data-customer-channel="Facebook">Facebook</button>
-              <button class="filter-button" type="button" data-customer-channel="LINE">LINE</button>
-              <button class="filter-button" type="button" data-customer-channel="TikTok">TikTok</button>
-            </div>
-          </div>
-
-          <!-- CRM CUSTOMERS TABLE -->
           <div class="table-wrap">
             <table>
               <thead>
@@ -278,11 +306,13 @@
                   <th>ช่องทาง</th>
                   <th>เบอร์โทร</th>
                   <th>ความสนใจ</th>
-                  <th>คะแนนลีด</th>
-                  <th>ผู้ดูแล</th>
-                  <th>รูปคนไข้ (ก่อน/หลัง/รอ)</th>
                   <th>สถานะ</th>
-                  <th>จัดการ</th>
+                  <th>ยอดจอง</th>
+                  <th>ยอดสลิปรวม</th>
+                  <th>AI ตรวจสลิป</th>
+                  <th>รูปก่อน/หลัง</th>
+                  <th>สลิปโอนเงิน</th>
+                  <th>เจ้าของงาน</th>
                 </tr>
               </thead>
               <tbody id="customerRows"></tbody>
@@ -403,30 +433,53 @@
               <div class="integration-title">
                 <div>
                   <h2>LINE Official Account</h2>
-                  <p>LINE Messaging API และ Channel secret</p>
+                  <p>Messaging API (รองรับ 2 บัญชี)</p>
                 </div>
                 <span class="connection-state" data-status="line">ยังไม่เชื่อมต่อ</span>
               </div>
               <code>/webhooks/line</code>
+              
+              <div style="font-weight: 700; margin-top: 10px; color: var(--accent); font-size: 13px;">บัญชีที่ 1 (Account 1)</div>
               <label class="form-field">
-                <span>Channel ID</span>
-                <input name="channelId" type="text" placeholder="กรอก Channel ID" />
+                <span>Channel ID (1)</span>
+                <input name="channelId" type="text" placeholder="กรอก Channel ID ของบัญชีที่ 1" />
               </label>
               <label class="form-field secret-field">
-                <span>Channel Secret</span>
+                <span>Channel Secret (1)</span>
                 <div>
-                  <input name="channelSecret" type="password" placeholder="กรอก Channel secret" />
-                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Channel Secret">◉</button>
+                  <input name="channelSecret" type="password" placeholder="กรอก Channel secret ของบัญชีที่ 1" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Channel Secret 1">◉</button>
                 </div>
               </label>
               <label class="form-field secret-field">
-                <span>Channel Access Token</span>
+                <span>Channel Access Token (1)</span>
                 <div>
-                  <input name="accessToken" type="password" placeholder="กรอก Channel access token" />
-                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Channel Access Token">◉</button>
+                  <input name="accessToken" type="password" placeholder="กรอก Channel access token ของบัญชีที่ 1" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Channel Access Token 1">◉</button>
                 </div>
               </label>
-              <div class="integration-actions">
+
+              <div style="font-weight: 700; margin-top: 20px; color: var(--accent); font-size: 13px;">บัญชีที่ 2 (Account 2)</div>
+              <label class="form-field">
+                <span>Channel ID (2)</span>
+                <input name="channelId2" type="text" placeholder="กรอก Channel ID ของบัญชีที่ 2 (ถ้ามี)" />
+              </label>
+              <label class="form-field secret-field">
+                <span>Channel Secret (2)</span>
+                <div>
+                  <input name="channelSecret2" type="password" placeholder="กรอก Channel secret ของบัญชีที่ 2 (ถ้ามี)" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Channel Secret 2">◉</button>
+                </div>
+              </label>
+              <label class="form-field secret-field">
+                <span>Channel Access Token (2)</span>
+                <div>
+                  <input name="accessToken2" type="password" placeholder="กรอก Channel access token ของบัญชีที่ 2 (ถ้ามี)" />
+                  <button class="icon-button toggle-secret" type="button" aria-label="แสดงหรือซ่อน Channel Access Token 2">◉</button>
+                </div>
+              </label>
+
+              <div class="integration-actions" style="margin-top: 15px;">
                 <button class="save-config" type="button">บันทึก</button>
                 <button class="test-config" type="button">ทดสอบ</button>
                 <button class="clear-config" type="button">ล้างค่า</button>
