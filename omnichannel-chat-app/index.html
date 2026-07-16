@@ -134,75 +134,19 @@
         </section>
 
         <section id="crmView" class="view" aria-label="ระบบ CRM">
-          <div class="dashboard-head">
-            <div>
-              <p class="eyebrow">CRM Workspace</p>
-              <h2>ระบบบริหารความสัมพันธ์ลูกค้า (CRM Workspace)</h2>
-            </div>
-          </div>
-
-          <!-- CRM STATS GRID -->
-          <div class="metrics-grid" style="margin-bottom: 20px;">
-            <article class="metric">
-              <span>ลีดทั้งหมด</span>
-              <strong id="crmTotalLeads">0</strong>
-              <small>รวมทุกช่องทาง</small>
-            </article>
-            <article class="metric warning">
-              <span>ต้องติดตาม</span>
-              <strong id="crmActiveFollowups">0</strong>
-              <small>ต้องติดตามการรักษา</small>
-            </article>
-            <article class="metric success">
-              <span>ปิดการขายแล้ว</span>
-              <strong id="crmConvertedLeads">0</strong>
-              <small>เสร็จสิ้นความต้องการ</small>
-            </article>
-            <article class="metric overdue-sla-metric" style="border-left: 4px solid var(--accent-red, #ef4444);">
-              <span>เกินกำหนด SLA</span>
-              <strong id="crmOverdueSla">0</strong>
-              <small>แชทไม่คืบหน้า</small>
-            </article>
-          </div>
-
-          <!-- CRM FILTER BAR -->
-          <div class="crm-filters-container" style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--line);">
-            <input type="text" id="crmSearchInput" placeholder="ค้นหาชื่อลูกค้า, เบอร์โทร..." style="flex: 1; min-width: 200px; padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;" />
-            <select id="crmStatusFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea; font-family: inherit;">
-              <option value="all">สถานะทั้งหมด</option>
-              <option value="ลูกค้าใหม่">ลูกค้าใหม่</option>
-              <option value="ต้องติดตาม">ต้องติดตาม</option>
-              <option value="กำลังพิจารณา">กำลังพิจารณา</option>
-              <option value="จองคิว">จองคิว</option>
-              <option value="ปิดการขาย">ปิดการขาย</option>
-              <option value="ไม่สนใจ">ไม่สนใจ</option>
-            </select>
-            <select id="crmAssigneeFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea; font-family: inherit;">
-              <option value="all">ผู้ดูแลทั้งหมด</option>
-              <option value="Sale A">Sale A</option>
-              <option value="Sale B">Sale B</option>
-              <option value="Unassigned">ไม่มีผู้ดูแล</option>
-            </select>
-          </div>
-
-          <!-- CRM CUSTOMERS TABLE -->
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>ลูกค้า</th>
-                  <th>ช่องทาง</th>
-                  <th>เบอร์โทร</th>
-                  <th>ความสนใจ</th>
-                  <th>คะแนนลีด</th>
-                  <th>ผู้ดูแล</th>
-                  <th>รูปคนไข้ (ก่อน/หลัง/รอ)</th>
-                  <th>สถานะ</th>
-                  <th>จัดการ</th>
-                </tr>
-              </thead>
-              <tbody id="crmCustomerRows"></tbody>
-            </table>
+          <div class="workspace">
+            <aside class="sidebar-panel" aria-label="รายการแชท">
+              <div class="conversation-header">
+                <h2>บทสนทนา (CRM)</h2>
+              </div>
+              <div class="conversation-list" id="crmConversationList"></div>
+            </aside>
+            <section class="chat-panel" aria-label="รายละเอียดแชท">
+              <div id="crmChatDetail" class="chat-detail"></div>
+            </section>
+            <aside class="profile-panel" aria-label="ข้อมูลที่เก็บจากแชท">
+              <div id="crmProfileDetail"></div>
+            </aside>
           </div>
         </section>
 

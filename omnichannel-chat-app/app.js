@@ -259,6 +259,7 @@ const channelConfigFields = {
 };
 
 let selectedId = conversations[0].id;
+let selectedCrmId = "";
 let channelFilter = "all";
 let customerChannelFilter = "all";
 const selectedCustomerIds = new Set();
@@ -1825,176 +1826,273 @@ document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => 
 });
 
 // CRM Workspace Loader & Table Renderer
-function renderCrm() {
-  const crmConversations = conversations.filter(c => c.channel === 'LINE' && c.lineAccount === 2);
-
-  const total = crmConversations.length;
-  const activeFollowups = crmConversations.filter(c => c.status === 'ต้องติดตาม').length;
-  const converted = crmConversations.filter(c => c.status === 'ปิดการขาย').length;
-  const overdueSla = crmConversations.filter(c => {
-    const aiState = getAiResponseState(c);
-    return aiState.overdue;
-  }).length;
-
-  const totalCard = document.querySelector('#crmTotalLeads');
-  const activeCard = document.querySelector('#crmActiveFollowups');
-  const convertedCard = document.querySelector('#crmConvertedLeads');
-  const overdueCard = document.querySelector('#crmOverdueSla');
-
-  if (totalCard) totalCard.textContent = total;
-  if (activeCard) activeCard.textContent = activeFollowups;
-  if (convertedCard) convertedCard.textContent = converted;
-  if (overdueCard) overdueCard.textContent = overdueSla;
-
-  const tbody = document.querySelector("#crmCustomerRows");
-  if (!tbody) return;
-
-  const searchQuery = document.querySelector("#crmSearchInput")?.value.trim().toLowerCase() || "";
-  const statusFilter = document.querySelector("#crmStatusFilter")?.value || "all";
-  const assigneeFilter = document.querySelector("#crmAssigneeFilter")?.value || "all";
-
-  const filtered = crmConversations.filter((item) => {
-    const nameVal = (item.name || "").toLowerCase();
-    const phoneVal = (item.phone || "");
-    const searchMatch = !searchQuery || nameVal.includes(searchQuery) || phoneVal.includes(searchQuery);
-    const statusMatch = statusFilter === "all" || item.status === statusFilter;
-    let assigneeMatch = true;
-    if (assigneeFilter !== "all") {
-      if (assigneeFilter === "Unassigned") {
-        assigneeMatch = item.owner === "Unassigned" || !item.owner;
-      } else {
-        assigneeMatch = item.owner === assigneeFilter;
-      }
+function initSelectedCrmId() {
+  if (!selectedCrmId) {
+    const crmAcc2 = conversations.find(c => c.channel === "LINE" && c.lineAccount === 2);
+    if (crmAcc2) {
+      selectedCrmId = crmAcc2.id;
     }
-    return searchMatch && statusMatch && assigneeMatch;
+  }
+}
+
+function renderCrm() {
+  initSelectedCrmId();
+  renderCrmConversations();
+  renderCrmChat();
+  renderCrmProfile();
+}
+
+function renderCrmConversations() {
+  const list = document.getElementById("crmConversationList");
+  if (!list) return;
+
+  const items = conversations.filter(c => c.channel === "LINE" && c.lineAccount === 2);
+  list.innerHTML = items
+    .map(
+      (item) => {
+        const messages = getConversationMessages(item);
+        const latestMessage = messages[messages.length - 1];
+        const aiState = getAiResponseState(item);
+        return `
+        <button class="conversation-item ${item.id === selectedCrmId ? "active" : ""}" type="button" data-id="${item.id}">
+          <div class="avatar ${item.channel}">${item.name.slice(3, 5)}</div>
+          <div class="conversation-copy">
+            <strong>${item.name}</strong>
+            <span>${getMessageText(latestMessage)}</span>
+            <small class="ai-response-chip ${aiState.tone}">${aiState.label}</small>
+          </div>
+          <span class="conversation-time">${item.time}</span>
+        </button>
+      `;
+      },
+    )
+    .join("") || `<p style="padding: 20px; color: #64748b; text-align: center;">ไม่มีบทสนทนาของบัญชี 2</p>`;
+
+  list.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedCrmId = button.dataset.id;
+      renderAll();
+    });
   });
-
-  tbody.innerHTML = filtered.map((item) => {
-    const beforeVal = item.before_img_count || 0;
-    const afterVal = item.after_img_count || 0;
-    const pendingVal = item.review_img_count || 0;
-
-    let scoreColor = '#64748b';
-    if (item.score >= 80) scoreColor = '#126b68';
-    else if (item.score >= 50) scoreColor = '#d97706';
-    else if (item.score > 0) scoreColor = '#ef4444';
-
-    return `
-      <tr>
-        <td><strong>${escapeHtml(item.name)}</strong></td>
-        <td><span class="badge ${item.channel}">${item.channel}</span></td>
-        <td>${escapeHtml(item.phone || '-')}</td>
-        <td>${escapeHtml(item.interest || '-')}</td>
-        <td style="font-weight: 800; color: ${scoreColor};">${item.score || 0}</td>
-        <td>${escapeHtml(item.owner || 'ไม่มี')}</td>
-        <td>
-          <span style="font-size: 11px; color:#64748b;">ก่อน: <b>${beforeVal}</b> · หลัง: <b>${afterVal}</b> · รอ: <b>${pendingVal}</b></span>
-        </td>
-        <td><span class="slip-state ${item.status === "ปิดการขาย" ? "has-slip" : ""}">${escapeHtml(item.status || 'ลูกค้าใหม่')}</span></td>
-        <td>
-          <button class="edit-user-button table-edit" type="button" onclick="openCrmEditModal('${item.id}')" style="margin-right: 4px;">แก้ไข</button>
-          <button class="edit-user-button table-edit" type="button" onclick="openCrmChatModal('${item.id}')">แชท</button>
-        </td>
-      </tr>
-    `;
-  }).join("") || `
-    <tr>
-      <td colspan="9" style="text-align: center; color: #64748b; padding: 20px;">ไม่พบข้อมูลลูกค้าที่ค้นหา</td>
-    </tr>
-  `;
 }
 
-// CRM Chat Modal Overlays
-window.openCrmChatModal = function(customerId) {
-  const customer = conversations.find(c => c.id === customerId);
-  if (!customer) return;
+function renderCrmChat() {
+  const container = document.getElementById("crmChatDetail");
+  if (!container) return;
 
-  selectedId = customerId; // Link globally
-  
-  const modal = document.getElementById('crmChatModal');
-  const title = document.getElementById('crmChatModalTitle');
-  const channelBadge = document.getElementById('crmChatModalChannel');
-  const body = document.getElementById('crmChatModalBody');
-
-  if (title) title.textContent = `แชทกับคุณ ${customer.name}`;
-  if (channelBadge) {
-    channelBadge.textContent = customer.channel;
-    channelBadge.className = `badge ${customer.channel}`;
+  const item = conversations.find((c) => c.id === selectedCrmId);
+  if (!item) {
+    container.innerHTML = `<div style="padding: 40px; text-align: center; color: #64748b;">เลือกบทสนทนาเพื่อแสดงรายละเอียดแชท</div>`;
+    return;
   }
 
-  renderCrmChatContent(customer, body);
-
-  if (modal) {
-    modal.style.display = 'grid';
-    modal.classList.remove('hidden');
-  }
-}
-
-window.closeCrmChatModal = function() {
-  const modal = document.getElementById('crmChatModal');
-  if (modal) {
-    modal.style.display = 'none';
-    modal.classList.add('hidden');
-  }
-}
-
-function renderCrmChatContent(customer, container) {
-  const messages = getConversationMessages(customer);
-  
+  const messages = getConversationMessages(item);
   container.innerHTML = `
-    ${renderAiResponsePanel(customer)}
-    <div class="messages" style="flex: 1; overflow-y: auto; padding: 10px 0;">
+    <div class="chat-head">
+      <div>
+        <h2>${item.name}</h2>
+        <span class="badge ${item.channel}">${item.channel}</span>
+      </div>
+      <span class="status-pill ${item.status === "ปิดการขาย" ? "done" : ""}">${item.status}</span>
+    </div>
+    ${renderAiResponsePanel(item)}
+    <div class="messages">
       ${messages
-        .map((message, index) => renderChatMessage(customer, message, index))
+        .map((message, index) => renderChatMessage(item, message, index))
         .join("")}
     </div>
-    <form id="crmChatComposerForm" class="composer" data-customer-id="${customer.id}" style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
-      <input id="crmChatComposerInput" type="text" placeholder="พิมพ์ข้อความตอบกลับ..." style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;" />
+    <form id="crmChatComposerForm" class="composer" data-customer-id="${item.id}">
+      <input id="crmChatComposerInput" type="text" placeholder="พิมพ์ข้อความตอบกลับหรือบันทึกโน้ต" />
       <button id="sendCrmChatButton" class="primary-button" type="submit">ส่ง</button>
     </form>
   `;
 
-  // Welcome AI handler
-  container.querySelectorAll(".send-ai-welcome").forEach((button) => {
-    button.addEventListener("click", async () => {
-      await sendAiWelcomeReply(button.dataset.customerId);
-      renderCrmChatContent(customer, container);
-    });
-  });
-
-  // Photo classify handler
-  container.querySelectorAll(".classify-photo").forEach((button) => {
-    button.addEventListener("click", () => {
-      classifyPatientPhoto(button.dataset.customerId, Number(button.dataset.messageIndex), button.dataset.stage);
-      renderCrmChatContent(customer, container);
-    });
-  });
-
-  // Save slip handler
   container.querySelectorAll(".save-chat-slip").forEach((button) => {
     button.addEventListener("click", () => {
       saveChatSlipToCustomer(button.dataset.customerId, Number(button.dataset.messageIndex));
-      renderCrmChatContent(customer, container);
+      renderAll();
     });
   });
 
-  // Composer submit
-  const form = container.querySelector("#crmChatComposerForm");
-  form?.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const input = form.querySelector("#crmChatComposerInput");
-    const text = input.value.trim();
-    if (!text) return;
-    
-    await sendChatMessage(customer.id, text);
-    renderCrmChatContent(customer, container);
+  container.querySelectorAll(".classify-photo").forEach((button) => {
+    button.addEventListener("click", () => {
+      classifyPatientPhoto(button.dataset.customerId, Number(button.dataset.messageIndex), button.dataset.stage);
+      renderAll();
+    });
   });
 
-  // Auto-scroll
-  const msgContainer = container.querySelector(".messages");
-  if (msgContainer) {
-    msgContainer.scrollTop = msgContainer.scrollHeight;
+  container.querySelectorAll(".send-ai-welcome").forEach((button) => {
+    button.addEventListener("click", () => {
+      sendAiWelcomeReply(button.dataset.customerId);
+      renderAll();
+    });
+  });
+
+  const composerForm = container.querySelector("#crmChatComposerForm");
+  composerForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const input = container.querySelector("#crmChatComposerInput");
+    const text = input.value.trim();
+    if (!text) return;
+    await sendChatMessage(item.id, text);
+    renderAll();
+  });
+}
+
+function renderCrmProfile() {
+  const container = document.getElementById("crmProfileDetail");
+  if (!container) return;
+
+  const item = conversations.find((conversation) => conversation.id === selectedCrmId);
+  if (!item) {
+    container.innerHTML = "";
+    return;
   }
+
+  const beforeVal = item.before_img_count || 0;
+  const afterVal = item.after_img_count || 0;
+  const pendingVal = item.review_img_count || 0;
+  const aiState = getAiResponseState(item);
+
+  container.innerHTML = `
+    <div class="profile-section">
+      <h3>ข้อมูลที่ดึงจากแชท</h3>
+      <div class="field-list">
+        <div class="field">
+          <span>ชื่อ</span>
+          <input type="text" id="crm-tab-input-name" value="${escapeHtml(item.name || '')}" />
+        </div>
+        <div class="field">
+          <span>เบอร์</span>
+          <input type="text" id="crm-tab-input-phone" value="${escapeHtml(item.phone || '')}" />
+        </div>
+        <div class="field">
+          <span>สนใจ</span>
+          <select id="crm-tab-input-interest">
+            <option value="" ${!item.interest ? 'selected' : ''}>-- เลือกคอร์ส --</option>
+            <option value="คอร์สลดน้ำหนัก" ${item.interest === 'คอร์สลดน้ำหนัก' ? 'selected' : ''}>คอร์สลดน้ำหนัก</option>
+            <option value="คอร์สลดเหนียง" ${item.interest === 'คอร์สลดเหนียง' ? 'selected' : ''}>คอร์สลดเหนียง</option>
+            <option value="คอร์สปรับรูปหน้า" ${item.interest === 'คอร์สปรับรูปหน้า' ? 'selected' : ''}>คอร์สปรับรูปหน้า</option>
+            <option value="ปรึกษาผิวหน้า" ${item.interest === 'ปรึกษาผิวหน้า' ? 'selected' : ''}>ปรึกษาผิวหน้า</option>
+            <option value="รีวิวสินค้า" ${item.interest === 'รีวิวสินค้า' ? 'selected' : ''}>รีวิวสินค้า</option>
+            <option value="อื่นๆ" ${item.interest === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>แหล่งที่มา</span>
+          <input type="text" id="crm-tab-input-source" value="${escapeHtml(item.sourcePost || '')}" />
+        </div>
+      </div>
+    </div>
+    <div class="profile-section">
+      <h3>Workflow</h3>
+      <div class="field-list">
+        <div class="field">
+          <span>คะแนน</span>
+          <input type="number" id="crm-tab-input-score" min="0" max="100" value="${item.score || 0}" />
+        </div>
+        <div class="field">
+          <span>สถานะ</span>
+          <select id="crm-tab-input-status">
+            <option value="ลูกค้าใหม่" ${item.status === 'ลูกค้าใหม่' ? 'selected' : ''}>ลูกค้าใหม่</option>
+            <option value="ต้องติดตาม" ${item.status === 'ต้องติดตาม' ? 'selected' : ''}>ต้องติดตาม</option>
+            <option value="กำลังพิจารณา" ${item.status === 'กำลังพิจารณา' ? 'selected' : ''}>กำลังพิจารณา</option>
+            <option value="จองคิว" ${item.status === 'จองคิว' ? 'selected' : ''}>จองคิว</option>
+            <option value="ปิดการขาย" ${item.status === 'ปิดการขาย' ? 'selected' : ''}>ปิดการขาย</option>
+            <option value="ไม่สนใจ" ${item.status === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>ผู้ดูแล</span>
+          <select id="crm-tab-input-assignee">
+            <option value="Unassigned" ${item.owner === 'Unassigned' || !item.owner ? 'selected' : ''}>ไม่มีผู้ดูแล</option>
+            <option value="Sale A" ${item.owner === 'Sale A' ? 'selected' : ''}>Sale A</option>
+            <option value="Sale B" ${item.owner === 'Sale B' ? 'selected' : ''}>Sale B</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="profile-section">
+      <h3>AI ตอบแชท</h3>
+      <div class="field-list">
+        <div class="field"><span>SLA</span><strong>ไม่เกิน ${AI_RESPONSE_LIMIT_MINUTES} นาที</strong></div>
+        <div class="field"><span>สถานะ</span><strong>${aiState.label}</strong></div>
+      </div>
+    </div>
+    <div class="profile-section">
+      <h3>รูปคนไข้</h3>
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <div style="flex: 1; text-align: center;">
+          <span style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px;">ก่อนทำ</span>
+          <input type="number" id="crm-tab-input-before" min="0" value="${beforeVal}" style="text-align: center; width: 100%;" />
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <span style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px;">หลังทำ</span>
+          <input type="number" id="crm-tab-input-after" min="0" value="${afterVal}" style="text-align: center; width: 100%;" />
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <span style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px;">รอแยก</span>
+          <input type="number" id="crm-tab-input-pending" min="0" value="${pendingVal}" style="text-align: center; width: 100%;" />
+        </div>
+      </div>
+    </div>
+    <button class="primary-button" type="button" onclick="saveActiveCustomerCrmFromTab()" style="width: 100%; margin-top: 10px;">สร้างงานติดตาม</button>
+  `;
+}
+
+window.saveActiveCustomerCrmFromTab = async function() {
+  if (!selectedCrmId) return;
+  const conversation = conversations.find((item) => item.id === selectedCrmId);
+  if (!conversation) return;
+
+  const name = document.getElementById('crm-tab-input-name').value;
+  const phone = document.getElementById('crm-tab-input-phone').value;
+  const interest = document.getElementById('crm-tab-input-interest').value;
+  const sourcePost = document.getElementById('crm-tab-input-source').value;
+  const score = parseInt(document.getElementById('crm-tab-input-score').value) || 0;
+  const status = document.getElementById('crm-tab-input-status').value;
+  const owner = document.getElementById('crm-tab-input-assignee').value;
+  
+  const before_img_count = parseInt(document.getElementById('crm-tab-input-before').value) || 0;
+  const after_img_count = parseInt(document.getElementById('crm-tab-input-after').value) || 0;
+  const review_img_count = parseInt(document.getElementById('crm-tab-input-pending').value) || 0;
+
+  const payload = {
+    name,
+    phone,
+    interest,
+    sourcePost,
+    score,
+    status,
+    owner,
+    before_img_count,
+    after_img_count,
+    review_img_count
+  };
+
+  if (apiBacked) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/customers/${encodeURIComponent(selectedCrmId)}/crm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        await loadConversationsFromApi();
+        renderAll();
+        showToast("บันทึกข้อมูลและสร้างงานติดตามลูกค้าสำเร็จ!");
+        return;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // Fallback
+  Object.assign(conversation, payload);
+  renderAll();
+  showToast("สร้างงานติดตามแบบจำลองสำเร็จ!");
 }
 
 async function initializeApp() {
