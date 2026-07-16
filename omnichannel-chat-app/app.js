@@ -909,6 +909,10 @@ function renderProfile() {
             <option value="จองคิว" ${item.sourcePost === 'จองคิว' ? 'selected' : ''}>จองคิว</option>
             <option value="ปิดการขาย" ${item.sourcePost === 'ปิดการขาย' ? 'selected' : ''}>ปิดการขาย</option>
             <option value="ไม่สนใจ" ${item.sourcePost === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
+            <option value="ไม่รีวิว" ${item.sourcePost === 'ไม่รีวิว' ? 'selected' : ''}>ไม่รีวิว</option>
+            <option value="รีวิว" ${item.sourcePost === 'รีวิว' ? 'selected' : ''}>รีวิว</option>
+            <option value="ลูกค้าต่างประเทศ" ${item.sourcePost === 'ลูกค้าต่างประเทศ' ? 'selected' : ''}>ลูกค้าต่างประเทศ</option>
+            <option value="เคสแก้" ${item.sourcePost === 'เคสแก้' ? 'selected' : ''}>เคสแก้</option>
           </select>
         </div>
         <div class="field">
@@ -953,6 +957,12 @@ function renderProfile() {
             <option value="" ${!item.photoDelivery ? 'selected' : ''}>-- เลือกสถานะส่งรูป --</option>
             <option value="ส่งรูปแล้ว" ${item.photoDelivery === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
             <option value="ไม่มีการส่งรูป" ${item.photoDelivery === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
+            <option value="หลังทำทันที่" ${item.photoDelivery === 'หลังทำทันที่' ? 'selected' : ''}>หลังทำทันที่</option>
+            <option value="ก่อนตัดไหม" ${item.photoDelivery === 'ก่อนตัดไหม' ? 'selected' : ''}>ก่อนตัดไหม</option>
+            <option value="ระหว่าง 1 เดือน" ${item.photoDelivery === 'ระหว่าง 1 เดือน' ? 'selected' : ''}>ระหว่าง 1 เดือน</option>
+            <option value="ระหว่าง 3 เดือน" ${item.photoDelivery === 'ระหว่าง 3 เดือน' ? 'selected' : ''}>ระหว่าง 3 เดือน</option>
+            <option value="ระหว่าง 6 เดือน" ${item.photoDelivery === 'ระหว่าง 6 เดือน' ? 'selected' : ''}>ระหว่าง 6 เดือน</option>
+            <option value="ระหว่าง 1 ปี" ${item.photoDelivery === 'ระหว่าง 1 ปี' ? 'selected' : ''}>ระหว่าง 1 ปี</option>
           </select>
         </div>
         <div class="field">
@@ -2118,6 +2128,10 @@ function renderCrmProfile() {
             <option value="จองคิว" ${item.sourcePost === 'จองคิว' ? 'selected' : ''}>จองคิว</option>
             <option value="ปิดการขาย" ${item.sourcePost === 'ปิดการขาย' ? 'selected' : ''}>ปิดการขาย</option>
             <option value="ไม่สนใจ" ${item.sourcePost === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
+            <option value="ไม่รีวิว" ${item.sourcePost === 'ไม่รีวิว' ? 'selected' : ''}>ไม่รีวิว</option>
+            <option value="รีวิว" ${item.sourcePost === 'รีวิว' ? 'selected' : ''}>รีวิว</option>
+            <option value="ลูกค้าต่างประเทศ" ${item.sourcePost === 'ลูกค้าต่างประเทศ' ? 'selected' : ''}>ลูกค้าต่างประเทศ</option>
+            <option value="เคสแก้" ${item.sourcePost === 'เคสแก้' ? 'selected' : ''}>เคสแก้</option>
           </select>
         </div>
         <div class="field">
@@ -2162,6 +2176,12 @@ function renderCrmProfile() {
             <option value="" ${!item.photoDelivery ? 'selected' : ''}>-- เลือกสถานะส่งรูป --</option>
             <option value="ส่งรูปแล้ว" ${item.photoDelivery === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
             <option value="ไม่มีการส่งรูป" ${item.photoDelivery === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
+            <option value="หลังทำทันที่" ${item.photoDelivery === 'หลังทำทันที่' ? 'selected' : ''}>หลังทำทันที่</option>
+            <option value="ก่อนตัดไหม" ${item.photoDelivery === 'ก่อนตัดไหม' ? 'selected' : ''}>ก่อนตัดไหม</option>
+            <option value="ระหว่าง 1 เดือน" ${item.photoDelivery === 'ระหว่าง 1 เดือน' ? 'selected' : ''}>ระหว่าง 1 เดือน</option>
+            <option value="ระหว่าง 3 เดือน" ${item.photoDelivery === 'ระหว่าง 3 เดือน' ? 'selected' : ''}>ระหว่าง 3 เดือน</option>
+            <option value="ระหว่าง 6 เดือน" ${item.photoDelivery === 'ระหว่าง 6 เดือน' ? 'selected' : ''}>ระหว่าง 6 เดือน</option>
+            <option value="ระหว่าง 1 ปี" ${item.photoDelivery === 'ระหว่าง 1 ปี' ? 'selected' : ''}>ระหว่าง 1 ปี</option>
           </select>
         </div>
         <div class="field">
