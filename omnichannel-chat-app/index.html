@@ -606,6 +606,24 @@
       </div>
     </div>
 
+    <!-- CRM CHAT MODAL -->
+    <div id="crmChatModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; place-items: center; z-index: 1000;">
+      <div class="modal-content" style="background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 640px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; height: 80vh;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h2 id="crmChatModalTitle" style="margin: 0; font-size: 18px; color: #1e293b;">แชทลูกค้า</h2>
+            <span id="crmChatModalChannel" class="badge">Facebook</span>
+          </div>
+          <button type="button" onclick="closeCrmChatModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        
+        <!-- Chat body container -->
+        <div id="crmChatModalBody" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-height: 0;">
+          <!-- Inside here, we will render the messages and composer! -->
+        </div>
+      </div>
+    </div>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="app.js"></script>
   </body>

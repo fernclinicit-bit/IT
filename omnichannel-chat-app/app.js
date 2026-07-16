@@ -947,94 +947,63 @@ function renderWorkflow() {
 }
 
 function renderCustomers() {
-  // Update stats cards first
-  const total = conversations.length;
-  const activeFollowups = conversations.filter(c => c.status === 'ต้องติดตาม').length;
-  const converted = conversations.filter(c => c.status === 'ปิดการขาย').length;
-  
-  // Calculate overdue SLA
-  const overdueSla = conversations.filter(c => {
-    const aiState = getAiResponseState(c);
-    return aiState.overdue;
-  }).length;
-
-  const totalCard = document.querySelector('#crmTotalLeads');
-  const activeCard = document.querySelector('#crmActiveFollowups');
-  const convertedCard = document.querySelector('#crmConvertedLeads');
-  const overdueCard = document.querySelector('#crmOverdueSla');
-
-  if (totalCard) totalCard.textContent = total;
-  if (activeCard) activeCard.textContent = activeFollowups;
-  if (convertedCard) convertedCard.textContent = converted;
-  if (overdueCard) overdueCard.textContent = overdueSla;
-
-  // Filter conversations
-  const searchQuery = document.querySelector("#crmSearchInput")?.value.trim().toLowerCase() || "";
-  const statusFilter = document.querySelector("#crmStatusFilter")?.value || "all";
-  const assigneeFilter = document.querySelector("#crmAssigneeFilter")?.value || "all";
-  const channelFilterVal = customerChannelFilter || "all";
-
-  const filtered = conversations.filter((item) => {
-    // Search filter
-    const nameVal = (item.name || "").toLowerCase();
-    const phoneVal = (item.phone || "");
-    const searchMatch = !searchQuery || nameVal.includes(searchQuery) || phoneVal.includes(searchQuery);
-
-    // Status filter
-    const statusMatch = statusFilter === "all" || item.status === statusFilter;
-
-    // Assignee filter
-    let assigneeMatch = true;
-    if (assigneeFilter !== "all") {
-      if (assigneeFilter === "Unassigned") {
-        assigneeMatch = item.owner === "Unassigned" || !item.owner;
-      } else {
-        assigneeMatch = item.owner === assigneeFilter;
-      }
-    }
-
-    // Channel filter
-    const channelMatch = channelFilterVal === "all" || item.channel === channelFilterVal;
-
-    return searchMatch && statusMatch && assigneeMatch && channelMatch;
-  });
-
-  customerRows.innerHTML = filtered.map((item) => {
-    const beforeVal = item.before_img_count || 0;
-    const afterVal = item.after_img_count || 0;
-    const pendingVal = item.review_img_count || 0;
-
-    let scoreColor = '#64748b';
-    if (item.score >= 80) scoreColor = '#126b68';
-    else if (item.score >= 50) scoreColor = '#d97706';
-    else if (item.score > 0) scoreColor = '#ef4444';
-
-    return `
+  const customers = getFilteredCustomers();
+  const slips = getStoredSlips();
+  customerRows.innerHTML = customers
+    .map(
+      (item) => {
+        const slip = slips[item.id];
+        const photoSummary = getPatientPhotoSummary(item.id);
+        const bookingAmount = getBookingAmount(item);
+        const slipTotal = getSlipTotal(item);
+        const slipAudit = getSlipAudit(item);
+        return `
+        <tr>
+          <td class="check-cell">
+            <input class="customer-checkbox" type="checkbox" value="${item.id}" aria-label="เลือกลูกค้า ${item.name}" ${selectedCustomerIds.has(item.id) ? "checked" : ""} />
+          </td>
+          <td><strong>${item.name}</strong></td>
+          <td><span class="badge ${item.channel}">${item.channel}</span></td>
+          <td>${item.phone}</td>
+          <td>${item.interest}</td>
+          <td>${item.status}</td>
+          <td><strong class="money-cell">${formatBaht(bookingAmount)} บาท</strong></td>
+          <td><strong class="money-cell ${slipTotal ? "has-amount" : ""}">${formatBaht(slipTotal)} บาท</strong></td>
+          <td>
+            <div class="slip-audit ${slipAudit.tone}">
+              <strong>${slipAudit.label}</strong>
+              <span>${slipAudit.detail}</span>
+            </div>
+          </td>
+          <td>
+            <div class="photo-summary-cell">
+              <span>ก่อนทำ ${photoSummary.before}</span>
+              <span>หลังทำ ${photoSummary.after}</span>
+              ${photoSummary.pending ? `<small>รอแยก ${photoSummary.pending}</small>` : ""}
+            </div>
+          </td>
+          <td>
+            <div class="slip-cell">
+              <span class="slip-state ${slip ? "has-slip" : ""}">${slip ? "มีสลิปแล้ว" : "ยังไม่มีสลิป"}</span>
+              <span class="slip-name">${slip ? slip.name : "-"}</span>
+              <span class="slip-total-line">ยอดสลิปรวม ${formatBaht(slipTotal)} บาท</span>
+              ${slip?.source === "chat" ? `<span class="slip-source">จากห้องแชท ${slip.sourceChannel}</span>` : ""}
+              <div class="slip-actions">
+                <button class="view-slip" type="button" data-id="${item.id}" ${slip ? "" : "disabled"}>ดู</button>
+                <button class="remove-slip" type="button" data-id="${item.id}" ${slip ? "" : "disabled"}>ลบ</button>
+              </div>
+            </div>
+          </td>
+          <td>${item.owner}</td>
+        </tr>
+      `;
+      },
+    )
+    .join("") || `
       <tr>
-        <td class="check-cell">
-          <input class="customer-checkbox" type="checkbox" value="${item.id}" aria-label="เลือกลูกค้า ${item.name}" ${selectedCustomerIds.has(item.id) ? "checked" : ""} />
-        </td>
-        <td><strong>${escapeHtml(item.name)}</strong></td>
-        <td><span class="badge ${item.channel}">${item.channel}</span></td>
-        <td>${escapeHtml(item.phone || '-')}</td>
-        <td>${escapeHtml(item.interest || '-')}</td>
-        <td style="font-weight: 800; color: ${scoreColor};">${item.score || 0}</td>
-        <td>${escapeHtml(item.owner || 'ไม่มี')}</td>
-        <td>
-          <span style="font-size: 11px; color:#64748b;">ก่อน: <b>${beforeVal}</b> · หลัง: <b>${afterVal}</b> · รอ: <b>${pendingVal}</b></span>
-        </td>
-        <td><span class="slip-state ${item.status === "ปิดการขาย" ? "has-slip" : ""}">${escapeHtml(item.status || 'ลูกค้าใหม่')}</span></td>
-        <td>
-          <button class="edit-user-button table-edit" type="button" onclick="openCrmEditModal('${item.id}')" style="margin-right: 4px;">แก้ไข</button>
-          <button class="edit-user-button table-edit" type="button" onclick="navigateToChatWithCustomer('${item.id}')">แชท</button>
-        </td>
+        <td colspan="12" class="empty-row">ไม่พบข้อมูลลูกค้าในช่องทางนี้</td>
       </tr>
     `;
-  }).join("") || `
-    <tr>
-      <td colspan="10" style="text-align: center; color: #64748b; padding: 20px;">ไม่พบข้อมูลลูกค้าที่ค้นหา</td>
-    </tr>
-  `;
 
   customerRows.querySelectorAll(".customer-checkbox").forEach((checkbox) => {
     checkbox.addEventListener("change", () => {
@@ -1045,6 +1014,14 @@ function renderCustomers() {
       }
       updateCustomerSelectionState();
     });
+  });
+
+  customerRows.querySelectorAll(".view-slip").forEach((button) => {
+    button.addEventListener("click", () => viewSlip(button.dataset.id));
+  });
+
+  customerRows.querySelectorAll(".remove-slip").forEach((button) => {
+    button.addEventListener("click", () => removeSlip(button.dataset.id));
   });
 
   updateCustomerSelectionState();
@@ -1441,6 +1418,7 @@ function renderAll() {
   renderWorkflow();
   renderCustomers();
   renderUserAccounts();
+  renderCrm();
 }
 
 document.querySelectorAll(".nav-item").forEach((item) => {
@@ -1822,6 +1800,177 @@ document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => 
   renderAll();
   showToast("แก้ไขข้อมูลในเครื่องสำเร็จ!");
 });
+
+// CRM Workspace Loader & Table Renderer
+function renderCrm() {
+  const total = conversations.length;
+  const activeFollowups = conversations.filter(c => c.status === 'ต้องติดตาม').length;
+  const converted = conversations.filter(c => c.status === 'ปิดการขาย').length;
+  const overdueSla = conversations.filter(c => {
+    const aiState = getAiResponseState(c);
+    return aiState.overdue;
+  }).length;
+
+  const totalCard = document.querySelector('#crmTotalLeads');
+  const activeCard = document.querySelector('#crmActiveFollowups');
+  const convertedCard = document.querySelector('#crmConvertedLeads');
+  const overdueCard = document.querySelector('#crmOverdueSla');
+
+  if (totalCard) totalCard.textContent = total;
+  if (activeCard) activeCard.textContent = activeFollowups;
+  if (convertedCard) convertedCard.textContent = converted;
+  if (overdueCard) overdueCard.textContent = overdueSla;
+
+  const tbody = document.querySelector("#crmCustomerRows");
+  if (!tbody) return;
+
+  const searchQuery = document.querySelector("#crmSearchInput")?.value.trim().toLowerCase() || "";
+  const statusFilter = document.querySelector("#crmStatusFilter")?.value || "all";
+  const assigneeFilter = document.querySelector("#crmAssigneeFilter")?.value || "all";
+
+  const filtered = conversations.filter((item) => {
+    const nameVal = (item.name || "").toLowerCase();
+    const phoneVal = (item.phone || "");
+    const searchMatch = !searchQuery || nameVal.includes(searchQuery) || phoneVal.includes(searchQuery);
+    const statusMatch = statusFilter === "all" || item.status === statusFilter;
+    let assigneeMatch = true;
+    if (assigneeFilter !== "all") {
+      if (assigneeFilter === "Unassigned") {
+        assigneeMatch = item.owner === "Unassigned" || !item.owner;
+      } else {
+        assigneeMatch = item.owner === assigneeFilter;
+      }
+    }
+    return searchMatch && statusMatch && assigneeMatch;
+  });
+
+  tbody.innerHTML = filtered.map((item) => {
+    const beforeVal = item.before_img_count || 0;
+    const afterVal = item.after_img_count || 0;
+    const pendingVal = item.review_img_count || 0;
+
+    let scoreColor = '#64748b';
+    if (item.score >= 80) scoreColor = '#126b68';
+    else if (item.score >= 50) scoreColor = '#d97706';
+    else if (item.score > 0) scoreColor = '#ef4444';
+
+    return `
+      <tr>
+        <td><strong>${escapeHtml(item.name)}</strong></td>
+        <td><span class="badge ${item.channel}">${item.channel}</span></td>
+        <td>${escapeHtml(item.phone || '-')}</td>
+        <td>${escapeHtml(item.interest || '-')}</td>
+        <td style="font-weight: 800; color: ${scoreColor};">${item.score || 0}</td>
+        <td>${escapeHtml(item.owner || 'ไม่มี')}</td>
+        <td>
+          <span style="font-size: 11px; color:#64748b;">ก่อน: <b>${beforeVal}</b> · หลัง: <b>${afterVal}</b> · รอ: <b>${pendingVal}</b></span>
+        </td>
+        <td><span class="slip-state ${item.status === "ปิดการขาย" ? "has-slip" : ""}">${escapeHtml(item.status || 'ลูกค้าใหม่')}</span></td>
+        <td>
+          <button class="edit-user-button table-edit" type="button" onclick="openCrmEditModal('${item.id}')" style="margin-right: 4px;">แก้ไข</button>
+          <button class="edit-user-button table-edit" type="button" onclick="openCrmChatModal('${item.id}')">แชท</button>
+        </td>
+      </tr>
+    `;
+  }).join("") || `
+    <tr>
+      <td colspan="9" style="text-align: center; color: #64748b; padding: 20px;">ไม่พบข้อมูลลูกค้าที่ค้นหา</td>
+    </tr>
+  `;
+}
+
+// CRM Chat Modal Overlays
+window.openCrmChatModal = function(customerId) {
+  const customer = conversations.find(c => c.id === customerId);
+  if (!customer) return;
+
+  selectedId = customerId; // Link globally
+  
+  const modal = document.getElementById('crmChatModal');
+  const title = document.getElementById('crmChatModalTitle');
+  const channelBadge = document.getElementById('crmChatModalChannel');
+  const body = document.getElementById('crmChatModalBody');
+
+  if (title) title.textContent = `แชทกับคุณ ${customer.name}`;
+  if (channelBadge) {
+    channelBadge.textContent = customer.channel;
+    channelBadge.className = `badge ${customer.channel}`;
+  }
+
+  renderCrmChatContent(customer, body);
+
+  if (modal) {
+    modal.style.display = 'grid';
+    modal.classList.remove('hidden');
+  }
+}
+
+window.closeCrmChatModal = function() {
+  const modal = document.getElementById('crmChatModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }
+}
+
+function renderCrmChatContent(customer, container) {
+  const messages = getConversationMessages(customer);
+  
+  container.innerHTML = `
+    ${renderAiResponsePanel(customer)}
+    <div class="messages" style="flex: 1; overflow-y: auto; padding: 10px 0;">
+      ${messages
+        .map((message, index) => renderChatMessage(customer, message, index))
+        .join("")}
+    </div>
+    <form id="crmChatComposerForm" class="composer" data-customer-id="${customer.id}" style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
+      <input id="crmChatComposerInput" type="text" placeholder="พิมพ์ข้อความตอบกลับ..." style="flex: 1; padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;" />
+      <button id="sendCrmChatButton" class="primary-button" type="submit">ส่ง</button>
+    </form>
+  `;
+
+  // Welcome AI handler
+  container.querySelectorAll(".send-ai-welcome").forEach((button) => {
+    button.addEventListener("click", async () => {
+      await sendAiWelcomeReply(button.dataset.customerId);
+      renderCrmChatContent(customer, container);
+    });
+  });
+
+  // Photo classify handler
+  container.querySelectorAll(".classify-photo").forEach((button) => {
+    button.addEventListener("click", () => {
+      classifyPatientPhoto(button.dataset.customerId, Number(button.dataset.messageIndex), button.dataset.stage);
+      renderCrmChatContent(customer, container);
+    });
+  });
+
+  // Save slip handler
+  container.querySelectorAll(".save-chat-slip").forEach((button) => {
+    button.addEventListener("click", () => {
+      saveChatSlipToCustomer(button.dataset.customerId, Number(button.dataset.messageIndex));
+      renderCrmChatContent(customer, container);
+    });
+  });
+
+  // Composer submit
+  const form = container.querySelector("#crmChatComposerForm");
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const input = form.querySelector("#crmChatComposerInput");
+    const text = input.value.trim();
+    if (!text) return;
+    
+    await sendChatMessage(customer.id, text);
+    renderCrmChatContent(customer, container);
+  });
+
+  // Auto-scroll
+  const msgContainer = container.querySelector(".messages");
+  if (msgContainer) {
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  }
+}
 
 async function initializeApp() {
   await loadConversationsFromApi();
