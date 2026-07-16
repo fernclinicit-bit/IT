@@ -887,7 +887,7 @@ function renderProfile() {
           </select>
         </div>
         <div class="field">
-          <span>แหล่งที่มา</span>
+          <span>แท็กกลุ่มลูกค้า</span>
           <select id="crm-input-source">
             <option value="ลูกค้าใหม่" ${item.sourcePost === 'ลูกค้าใหม่' ? 'selected' : ''}>ลูกค้าใหม่</option>
             <option value="ต้องติดตาม" ${item.sourcePost === 'ต้องติดตาม' ? 'selected' : ''}>ต้องติดตาม</option>
@@ -915,6 +915,8 @@ function renderProfile() {
             <option value="ตามครั้งที่ 4" ${item.status === 'ตามครั้งที่ 4' ? 'selected' : ''}>ตามครั้งที่ 4</option>
             <option value="ตามครั้งที่ 5" ${item.status === 'ตามครั้งที่ 5' ? 'selected' : ''}>ตามครั้งที่ 5</option>
             <option value="ตามครั้งที่ 6" ${item.status === 'ตามครั้งที่ 6' ? 'selected' : ''}>ตามครั้งที่ 6</option>
+            <option value="ส่งรูปแล้ว" ${item.status === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
+            <option value="ไม่มีการส่งรูป" ${item.status === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
           </select>
         </div>
         <div class="field">
@@ -1986,7 +1988,7 @@ function renderCrmProfile() {
           </select>
         </div>
         <div class="field">
-          <span>แหล่งที่มา</span>
+          <span>แท็กกลุ่มลูกค้า</span>
           <select id="crm-tab-input-source">
             <option value="ลูกค้าใหม่" ${item.sourcePost === 'ลูกค้าใหม่' ? 'selected' : ''}>ลูกค้าใหม่</option>
             <option value="ต้องติดตาม" ${item.sourcePost === 'ต้องติดตาม' ? 'selected' : ''}>ต้องติดตาม</option>
@@ -2014,6 +2016,8 @@ function renderCrmProfile() {
             <option value="ตามครั้งที่ 4" ${item.status === 'ตามครั้งที่ 4' ? 'selected' : ''}>ตามครั้งที่ 4</option>
             <option value="ตามครั้งที่ 5" ${item.status === 'ตามครั้งที่ 5' ? 'selected' : ''}>ตามครั้งที่ 5</option>
             <option value="ตามครั้งที่ 6" ${item.status === 'ตามครั้งที่ 6' ? 'selected' : ''}>ตามครั้งที่ 6</option>
+            <option value="ส่งรูปแล้ว" ${item.status === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
+            <option value="ไม่มีการส่งรูป" ${item.status === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
           </select>
         </div>
         <div class="field">
