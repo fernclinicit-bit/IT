@@ -89,6 +89,7 @@ const conversations = [
     status: "1-7 วัน",
     phone: "064-560-8454",
     interest: "อื่นๆ",
+    doctor: "หมอวุ้นเส้น",
     bookingDoctor: "คุณหมอวุ้นเส้น",
     bookingDate: "25 กรกฎาคม 69 เวลา 10.00 น.",
     underlyingDisease: "แฝงทาลัสซีเมีย",
@@ -286,6 +287,7 @@ async function handleApi(req, res) {
     if (body.status !== undefined) conversation.status = body.status;
     if (body.photoDelivery !== undefined) conversation.photoDelivery = body.photoDelivery;
     if (body.owner !== undefined) conversation.owner = body.owner;
+    if (body.doctor !== undefined) conversation.doctor = body.doctor;
     
     if (body.before_img_count !== undefined) conversation.before_img_count = parseInt(body.before_img_count) || 0;
     if (body.after_img_count !== undefined) conversation.after_img_count = parseInt(body.after_img_count) || 0;

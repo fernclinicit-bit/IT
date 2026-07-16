@@ -902,6 +902,22 @@ function renderProfile() {
             <option value="ไม่สนใจ" ${item.sourcePost === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
           </select>
         </div>
+        <div class="field">
+          <span>แพทย์</span>
+          <select id="crm-input-doctor">
+            <option value="" ${!item.doctor ? 'selected' : ''}>-- เลือกแพทย์ --</option>
+            <option value="หมอเฟิร์น" ${item.doctor === 'หมอเฟิร์น' ? 'selected' : ''}>หมอเฟิร์น</option>
+            <option value="หมอฟาง" ${item.doctor === 'หมอฟาง' ? 'selected' : ''}>หมอฟาง</option>
+            <option value="หมอวุ้นเส้น" ${item.doctor === 'หมอวุ้นเส้น' ? 'selected' : ''}>หมอวุ้นเส้น</option>
+            <option value="หมอเชาว์" ${item.doctor === 'หมอเชาว์' ? 'selected' : ''}>หมอเชาว์</option>
+            <option value="หมอเจได" ${item.doctor === 'หมอเจได' ? 'selected' : ''}>หมอเจได</option>
+            <option value="หมอปาล์ม" ${item.doctor === 'หมอปาล์ม' ? 'selected' : ''}>หมอปาล์ม</option>
+            <option value="หมอพัน" ${item.doctor === 'หมอพัน' ? 'selected' : ''}>หมอพัน</option>
+            <option value="หมออายตา" ${item.doctor === 'หมออายตา' ? 'selected' : ''}>หมออายตา</option>
+            <option value="หมอวินนี่" ${item.doctor === 'หมอวินนี่' ? 'selected' : ''}>หมอวินนี่</option>
+            <option value="หมอไอริน" ${item.doctor === 'หมอไอริน' ? 'selected' : ''}>หมอไอริน</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="profile-section">
@@ -1730,6 +1746,7 @@ async function saveActiveCustomerCrm() {
   const phone = document.getElementById('crm-input-phone').value;
   const interest = document.getElementById('crm-input-interest').value;
   const sourcePost = document.getElementById('crm-input-source').value;
+  const doctor = document.getElementById('crm-input-doctor').value;
   const score = parseInt(document.getElementById('crm-input-score').value) || 0;
   const status = document.getElementById('crm-input-status').value;
   const photoDelivery = document.getElementById('crm-input-photo-delivery').value;
@@ -1751,6 +1768,7 @@ async function saveActiveCustomerCrm() {
     phone,
     interest,
     sourcePost,
+    doctor,
     score,
     status,
     photoDelivery,
@@ -1790,6 +1808,7 @@ async function saveActiveCustomerCrm() {
   conversation.phone = phone;
   conversation.interest = interest;
   conversation.sourcePost = sourcePost;
+  conversation.doctor = doctor;
   conversation.score = score;
   conversation.status = status;
   conversation.photoDelivery = photoDelivery;
@@ -1822,6 +1841,7 @@ window.openCrmEditModal = function(customerId) {
   document.getElementById('crm-edit-status').value = customer.status || '1-7 วัน';
   document.getElementById('crm-edit-photo-delivery').value = customer.photoDelivery || '';
   document.getElementById('crm-edit-assignee').value = customer.owner || 'Unassigned';
+  document.getElementById('crm-edit-doctor').value = customer.doctor || '';
 
   document.getElementById('crm-edit-booking-doctor').value = customer.bookingDoctor || '';
   document.getElementById('crm-edit-booking-date').value = customer.bookingDate || '';
@@ -1876,6 +1896,7 @@ document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => 
     status: document.getElementById('crm-edit-status').value,
     photoDelivery: document.getElementById('crm-edit-photo-delivery').value,
     owner: document.getElementById('crm-edit-assignee').value,
+    doctor: document.getElementById('crm-edit-doctor').value,
     bookingDoctor: document.getElementById('crm-edit-booking-doctor').value,
     bookingDate: document.getElementById('crm-edit-booking-date').value,
     underlyingDisease: document.getElementById('crm-edit-underlying-disease').value,
@@ -2081,6 +2102,22 @@ function renderCrmProfile() {
             <option value="ไม่สนใจ" ${item.sourcePost === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
           </select>
         </div>
+        <div class="field">
+          <span>แพทย์</span>
+          <select id="crm-tab-input-doctor">
+            <option value="" ${!item.doctor ? 'selected' : ''}>-- เลือกแพทย์ --</option>
+            <option value="หมอเฟิร์น" ${item.doctor === 'หมอเฟิร์น' ? 'selected' : ''}>หมอเฟิร์น</option>
+            <option value="หมอฟาง" ${item.doctor === 'หมอฟาง' ? 'selected' : ''}>หมอฟาง</option>
+            <option value="หมอวุ้นเส้น" ${item.doctor === 'หมอวุ้นเส้น' ? 'selected' : ''}>หมอวุ้นเส้น</option>
+            <option value="หมอเชาว์" ${item.doctor === 'หมอเชาว์' ? 'selected' : ''}>หมอเชาว์</option>
+            <option value="หมอเจได" ${item.doctor === 'หมอเจได' ? 'selected' : ''}>หมอเจได</option>
+            <option value="หมอปาล์ม" ${item.doctor === 'หมอปาล์ม' ? 'selected' : ''}>หมอปาล์ม</option>
+            <option value="หมอพัน" ${item.doctor === 'หมอพัน' ? 'selected' : ''}>หมอพัน</option>
+            <option value="หมออายตา" ${item.doctor === 'หมออายตา' ? 'selected' : ''}>หมออายตา</option>
+            <option value="หมอวินนี่" ${item.doctor === 'หมอวินนี่' ? 'selected' : ''}>หมอวินนี่</option>
+            <option value="หมอไอริน" ${item.doctor === 'หมอไอริน' ? 'selected' : ''}>หมอไอริน</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="profile-section">
@@ -2156,6 +2193,7 @@ window.saveActiveCustomerCrmFromTab = async function() {
   const phone = document.getElementById('crm-tab-input-phone').value;
   const interest = document.getElementById('crm-tab-input-interest').value;
   const sourcePost = document.getElementById('crm-tab-input-source').value;
+  const doctor = document.getElementById('crm-tab-input-doctor')?.value ?? (conversation.doctor || '');
   const score = parseInt(document.getElementById('crm-tab-input-score').value) || 0;
   const status = document.getElementById('crm-tab-input-status').value;
   const photoDelivery = document.getElementById('crm-tab-input-photo-delivery')?.value ?? (conversation.photoDelivery || '');
@@ -2177,6 +2215,7 @@ window.saveActiveCustomerCrmFromTab = async function() {
     phone,
     interest,
     sourcePost,
+    doctor,
     score,
     status,
     photoDelivery,
