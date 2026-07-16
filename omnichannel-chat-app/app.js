@@ -2329,3 +2329,64 @@ document.addEventListener('input', (event) => {
     }
   }
 });
+
+window.exportCrmDataToExcel = function() {
+  if (!conversations || conversations.length === 0) {
+    showToast("ไม่มีข้อมูลลูกค้าที่จะส่งออก");
+    return;
+  }
+
+  // UTF-8 BOM to ensure Excel opens Thai text correctly
+  let csvContent = "\ufeff";
+  
+  // Header row
+  const headers = [
+    "ไอดี", "ช่องทาง", "ชื่อลูกค้า", "เบอร์โทรศัพท์", "คอร์สที่สนใจ", 
+    "แท็กกลุ่มลูกค้า", "สถานะติดตาม", "การส่งรูป", "ระยะเวลา", "ผู้ดูแล", 
+    "แพทย์ที่จอง", "วันเวลาจองคิว", "โรคประจำตัว", "ประวัติแพ้ยา", 
+    "ราคาเคส (บาท)", "เงินมัดจำ (บาท)", "ยอดชำระวันทำ (บาท)", 
+    "จำนวนรูปก่อนทำ", "จำนวนรูปหลังทำ", "จำนวนรูปสลิป/รอแยก"
+  ];
+  
+  csvContent += headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",") + "\n";
+
+  // Data rows
+  conversations.forEach((item) => {
+    const dueAmount = (item.casePrice || 0) - (item.bookingAmount || 0);
+    const row = [
+      item.id || "",
+      item.channel || "",
+      item.name || "",
+      item.phone || "",
+      item.interest || "",
+      item.sourcePost || "",
+      item.status || "",
+      item.photoDelivery || "",
+      item.period || "",
+      item.owner || "",
+      item.bookingDoctor || item.doctor || "",
+      item.bookingDate || "",
+      item.underlyingDisease || "",
+      item.drugAllergy || "",
+      item.casePrice || 0,
+      item.bookingAmount || 0,
+      dueAmount,
+      item.before_img_count || 0,
+      item.after_img_count || 0,
+      item.review_img_count || 0
+    ];
+    csvContent += row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",") + "\n";
+  });
+
+  // Create download link
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Fern_Clinic_CRM_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("ส่งออกข้อมูล Excel สำเร็จ!");
+};
