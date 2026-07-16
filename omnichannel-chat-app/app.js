@@ -5,11 +5,11 @@ let conversations = [
     name: "คุณมินตรา",
     time: "10:42",
     owner: "Sale A",
-    status: "ต้องติดตาม",
+    status: "ตามครั้งที่ 1",
     phone: "089-234-8891",
     interest: "คอร์สลดน้ำหนัก",
     bookingAmount: 2900,
-    sourcePost: "โฆษณาโปรเดือนนี้",
+    sourcePost: "ต้องติดตาม",
     score: 86,
     waitingMinutes: 4,
     messages: [
@@ -35,11 +35,11 @@ let conversations = [
     name: "คุณต้น",
     time: "09:58",
     owner: "Sale B",
-    status: "จองคิว",
+    status: "ตามครั้งที่ 2",
     phone: "082-775-4410",
     interest: "ปรึกษาผิวหน้า",
     bookingAmount: 500,
-    sourcePost: "Rich menu",
+    sourcePost: "จองคิว",
     score: 91,
     waitingMinutes: 7,
     messages: [
@@ -66,11 +66,11 @@ let conversations = [
     name: "คุณวิภา (LINE Acc 2)",
     time: "10:15",
     owner: "Sale B",
-    status: "ต้องติดตาม",
+    status: "ตามครั้งที่ 1",
     phone: "081-992-3344",
     interest: "คอร์สปรับรูปหน้า",
     bookingAmount: 1500,
-    sourcePost: "โฆษณาโปรสิว",
+    sourcePost: "ต้องติดตาม",
     score: 78,
     waitingMinutes: 0,
     messages: [
@@ -84,11 +84,11 @@ let conversations = [
     name: "Nana Beauty",
     time: "09:21",
     owner: "Unassigned",
-    status: "รอคัดกรอง",
+    status: "ตามครั้งที่ 1",
     phone: "-",
     interest: "รีวิวสินค้า",
     bookingAmount: 0,
-    sourcePost: "Live comment",
+    sourcePost: "ลูกค้าใหม่",
     score: 54,
     waitingMinutes: 3,
     messages: [
@@ -103,11 +103,11 @@ let conversations = [
     name: "คุณก้อง",
     time: "เมื่อวาน",
     owner: "Sale A",
-    status: "ปิดการขาย",
+    status: "ตามครั้งที่ 1",
     phone: "086-112-9088",
     interest: "แพ็กเกจตรวจสุขภาพ",
     bookingAmount: 0,
-    sourcePost: "Inbox direct",
+    sourcePost: "ปิดการขาย",
     score: 78,
     waitingMinutes: 0,
     messages: [
@@ -888,7 +888,14 @@ function renderProfile() {
         </div>
         <div class="field">
           <span>แหล่งที่มา</span>
-          <input type="text" id="crm-input-source" value="${escapeHtml(item.sourcePost || '')}" />
+          <select id="crm-input-source">
+            <option value="ลูกค้าใหม่" ${item.sourcePost === 'ลูกค้าใหม่' ? 'selected' : ''}>ลูกค้าใหม่</option>
+            <option value="ต้องติดตาม" ${item.sourcePost === 'ต้องติดตาม' ? 'selected' : ''}>ต้องติดตาม</option>
+            <option value="กำลังพิจารณา" ${item.sourcePost === 'กำลังพิจารณา' ? 'selected' : ''}>กำลังพิจารณา</option>
+            <option value="จองคิว" ${item.sourcePost === 'จองคิว' ? 'selected' : ''}>จองคิว</option>
+            <option value="ปิดการขาย" ${item.sourcePost === 'ปิดการขาย' ? 'selected' : ''}>ปิดการขาย</option>
+            <option value="ไม่สนใจ" ${item.sourcePost === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
+          </select>
         </div>
       </div>
     </div>
@@ -902,12 +909,12 @@ function renderProfile() {
         <div class="field">
           <span>สถานะ</span>
           <select id="crm-input-status">
-            <option value="ลูกค้าใหม่" ${item.status === 'ลูกค้าใหม่' ? 'selected' : ''}>ลูกค้าใหม่</option>
-            <option value="ต้องติดตาม" ${item.status === 'ต้องติดตาม' ? 'selected' : ''}>ต้องติดตาม</option>
-            <option value="กำลังพิจารณา" ${item.status === 'กำลังพิจารณา' ? 'selected' : ''}>กำลังพิจารณา</option>
-            <option value="จองคิว" ${item.status === 'จองคิว' ? 'selected' : ''}>จองคิว</option>
-            <option value="ปิดการขาย" ${item.status === 'ปิดการขาย' ? 'selected' : ''}>ปิดการขาย</option>
-            <option value="ไม่สนใจ" ${item.status === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
+            <option value="ตามครั้งที่ 1" ${item.status === 'ตามครั้งที่ 1' ? 'selected' : ''}>ตามครั้งที่ 1</option>
+            <option value="ตามครั้งที่ 2" ${item.status === 'ตามครั้งที่ 2' ? 'selected' : ''}>ตามครั้งที่ 2</option>
+            <option value="ตามครั้งที่ 3" ${item.status === 'ตามครั้งที่ 3' ? 'selected' : ''}>ตามครั้งที่ 3</option>
+            <option value="ตามครั้งที่ 4" ${item.status === 'ตามครั้งที่ 4' ? 'selected' : ''}>ตามครั้งที่ 4</option>
+            <option value="ตามครั้งที่ 5" ${item.status === 'ตามครั้งที่ 5' ? 'selected' : ''}>ตามครั้งที่ 5</option>
+            <option value="ตามครั้งที่ 6" ${item.status === 'ตามครั้งที่ 6' ? 'selected' : ''}>ตามครั้งที่ 6</option>
           </select>
         </div>
         <div class="field">
@@ -1980,7 +1987,14 @@ function renderCrmProfile() {
         </div>
         <div class="field">
           <span>แหล่งที่มา</span>
-          <input type="text" id="crm-tab-input-source" value="${escapeHtml(item.sourcePost || '')}" />
+          <select id="crm-tab-input-source">
+            <option value="ลูกค้าใหม่" ${item.sourcePost === 'ลูกค้าใหม่' ? 'selected' : ''}>ลูกค้าใหม่</option>
+            <option value="ต้องติดตาม" ${item.sourcePost === 'ต้องติดตาม' ? 'selected' : ''}>ต้องติดตาม</option>
+            <option value="กำลังพิจารณา" ${item.sourcePost === 'กำลังพิจารณา' ? 'selected' : ''}>กำลังพิจารณา</option>
+            <option value="จองคิว" ${item.sourcePost === 'จองคิว' ? 'selected' : ''}>จองคิว</option>
+            <option value="ปิดการขาย" ${item.sourcePost === 'ปิดการขาย' ? 'selected' : ''}>ปิดการขาย</option>
+            <option value="ไม่สนใจ" ${item.sourcePost === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
+          </select>
         </div>
       </div>
     </div>
@@ -1994,12 +2008,12 @@ function renderCrmProfile() {
         <div class="field">
           <span>สถานะ</span>
           <select id="crm-tab-input-status">
-            <option value="ลูกค้าใหม่" ${item.status === 'ลูกค้าใหม่' ? 'selected' : ''}>ลูกค้าใหม่</option>
-            <option value="ต้องติดตาม" ${item.status === 'ต้องติดตาม' ? 'selected' : ''}>ต้องติดตาม</option>
-            <option value="กำลังพิจารณา" ${item.status === 'กำลังพิจารณา' ? 'selected' : ''}>กำลังพิจารณา</option>
-            <option value="จองคิว" ${item.status === 'จองคิว' ? 'selected' : ''}>จองคิว</option>
-            <option value="ปิดการขาย" ${item.status === 'ปิดการขาย' ? 'selected' : ''}>ปิดการขาย</option>
-            <option value="ไม่สนใจ" ${item.status === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
+            <option value="ตามครั้งที่ 1" ${item.status === 'ตามครั้งที่ 1' ? 'selected' : ''}>ตามครั้งที่ 1</option>
+            <option value="ตามครั้งที่ 2" ${item.status === 'ตามครั้งที่ 2' ? 'selected' : ''}>ตามครั้งที่ 2</option>
+            <option value="ตามครั้งที่ 3" ${item.status === 'ตามครั้งที่ 3' ? 'selected' : ''}>ตามครั้งที่ 3</option>
+            <option value="ตามครั้งที่ 4" ${item.status === 'ตามครั้งที่ 4' ? 'selected' : ''}>ตามครั้งที่ 4</option>
+            <option value="ตามครั้งที่ 5" ${item.status === 'ตามครั้งที่ 5' ? 'selected' : ''}>ตามครั้งที่ 5</option>
+            <option value="ตามครั้งที่ 6" ${item.status === 'ตามครั้งที่ 6' ? 'selected' : ''}>ตามครั้งที่ 6</option>
           </select>
         </div>
         <div class="field">

@@ -503,7 +503,14 @@
 
           <label style="display: flex; flex-direction: column; gap: 4px;">
             <span style="font-size: 13px; font-weight: 600; color: #64748b;">แหล่งที่มา</span>
-            <input type="text" id="crm-edit-source" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
+            <select id="crm-edit-source" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
+              <option value="ลูกค้าใหม่">ลูกค้าใหม่</option>
+              <option value="ต้องติดตาม">ต้องติดตาม</option>
+              <option value="กำลังพิจารณา">กำลังพิจารณา</option>
+              <option value="จองคิว">จองคิว</option>
+              <option value="ปิดการขาย">ปิดการขาย</option>
+              <option value="ไม่สนใจ">ไม่สนใจ</option>
+            </select>
           </label>
 
           <div style="display: flex; gap: 12px;">
@@ -514,12 +521,12 @@
             <label style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
               <span style="font-size: 13px; font-weight: 600; color: #64748b;">สถานะติดตาม</span>
               <select id="crm-edit-status" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
-                <option value="ลูกค้าใหม่">ลูกค้าใหม่</option>
-                <option value="ต้องติดตาม">ต้องติดตาม</option>
-                <option value="กำลังพิจารณา">กำลังพิจารณา</option>
-                <option value="จองคิว">จองคิว</option>
-                <option value="ปิดการขาย">ปิดการขาย</option>
-                <option value="ไม่สนใจ">ไม่สนใจ</option>
+                <option value="ตามครั้งที่ 1">ตามครั้งที่ 1</option>
+                <option value="ตามครั้งที่ 2">ตามครั้งที่ 2</option>
+                <option value="ตามครั้งที่ 3">ตามครั้งที่ 3</option>
+                <option value="ตามครั้งที่ 4">ตามครั้งที่ 4</option>
+                <option value="ตามครั้งที่ 5">ตามครั้งที่ 5</option>
+                <option value="ตามครั้งที่ 6">ตามครั้งที่ 6</option>
               </select>
             </label>
           </div>
