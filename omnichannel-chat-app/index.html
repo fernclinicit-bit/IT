@@ -206,18 +206,67 @@
 
         <section id="customersView" class="view" aria-label="ฐานข้อมูลลูกค้า">
           <div class="panel-head">
-            <h2>ข้อมูลลูกค้า</h2>
+            <div>
+              <p class="eyebrow">Customer Database & CRM</p>
+              <h2>ข้อมูลลูกค้า & การติดตามงาน</h2>
+            </div>
             <div class="customer-actions">
               <span id="selectedCustomersCount" class="selection-count">เลือก 0 รายการ</span>
-              <div class="customer-filters" role="tablist" aria-label="ค้นหาตามช่องทาง">
-                <button class="filter-button active" type="button" data-customer-channel="all">ทั้งหมด</button>
-                <button class="filter-button" type="button" data-customer-channel="Facebook">Facebook</button>
-                <button class="filter-button" type="button" data-customer-channel="LINE">LINE</button>
-                <button class="filter-button" type="button" data-customer-channel="TikTok">TikTok</button>
-              </div>
               <button id="exportButton" class="secondary-button" type="button">ส่งออก Excel</button>
             </div>
           </div>
+
+          <!-- CRM STATS GRID -->
+          <div class="metrics-grid" style="margin-bottom: 20px;">
+            <article class="metric">
+              <span>ลีดทั้งหมด</span>
+              <strong id="crmTotalLeads">0</strong>
+              <small>รวมทุกช่องทาง</small>
+            </article>
+            <article class="metric warning">
+              <span>ต้องติดตาม</span>
+              <strong id="crmActiveFollowups">0</strong>
+              <small>ต้องติดตามการรักษา</small>
+            </article>
+            <article class="metric success">
+              <span>ปิดการขายแล้ว</span>
+              <strong id="crmConvertedLeads">0</strong>
+              <small>เสร็จสิ้นความต้องการ</small>
+            </article>
+            <article class="metric overdue-sla-metric" style="border-left: 4px solid var(--accent-red, #ef4444);">
+              <span>เกินกำหนด SLA</span>
+              <strong id="crmOverdueSla">0</strong>
+              <small>แชทไม่คืบหน้า</small>
+            </article>
+          </div>
+
+          <!-- CRM FILTER BAR -->
+          <div class="crm-filters-container" style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background: #fff; padding: 16px; border-radius: 8px; border: 1px solid var(--line);">
+            <input type="text" id="crmSearchInput" placeholder="ค้นหาชื่อลูกค้า, เบอร์โทร..." style="flex: 1; min-width: 200px; padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;" />
+            <select id="crmStatusFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea; font-family: inherit;">
+              <option value="all">สถานะทั้งหมด</option>
+              <option value="ลูกค้าใหม่">ลูกค้าใหม่</option>
+              <option value="ต้องติดตาม">ต้องติดตาม</option>
+              <option value="กำลังพิจารณา">กำลังพิจารณา</option>
+              <option value="จองคิว">จองคิว</option>
+              <option value="ปิดการขาย">ปิดการขาย</option>
+              <option value="ไม่สนใจ">ไม่สนใจ</option>
+            </select>
+            <select id="crmAssigneeFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea; font-family: inherit;">
+              <option value="all">ผู้ดูแลทั้งหมด</option>
+              <option value="Sale A">Sale A</option>
+              <option value="Sale B">Sale B</option>
+              <option value="Unassigned">ไม่มีผู้ดูแล</option>
+            </select>
+            <div class="customer-filters" role="tablist" aria-label="ค้นหาตามช่องทาง">
+              <button class="filter-button active" type="button" data-customer-channel="all">ทั้งหมด</button>
+              <button class="filter-button" type="button" data-customer-channel="Facebook">Facebook</button>
+              <button class="filter-button" type="button" data-customer-channel="LINE">LINE</button>
+              <button class="filter-button" type="button" data-customer-channel="TikTok">TikTok</button>
+            </div>
+          </div>
+
+          <!-- CRM CUSTOMERS TABLE -->
           <div class="table-wrap">
             <table>
               <thead>
@@ -229,13 +278,11 @@
                   <th>ช่องทาง</th>
                   <th>เบอร์โทร</th>
                   <th>ความสนใจ</th>
+                  <th>คะแนนลีด</th>
+                  <th>ผู้ดูแล</th>
+                  <th>รูปคนไข้ (ก่อน/หลัง/รอ)</th>
                   <th>สถานะ</th>
-                  <th>ยอดจอง</th>
-                  <th>ยอดสลิปรวม</th>
-                  <th>AI ตรวจสลิป</th>
-                  <th>รูปก่อน/หลัง</th>
-                  <th>สลิปโอนเงิน</th>
-                  <th>เจ้าของงาน</th>
+                  <th>จัดการ</th>
                 </tr>
               </thead>
               <tbody id="customerRows"></tbody>
@@ -422,6 +469,88 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <!-- CRM EDIT MODAL -->
+    <div id="crmEditModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; place-items: center; z-index: 1000;">
+      <div class="modal-content" style="background: #fff; padding: 24px; border-radius: 12px; width: 100%; max-width: 480px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="margin: 0; font-size: 20px; color: #1e293b;">แก้ไขข้อมูล CRM</h2>
+          <button type="button" onclick="closeCrmEditModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form id="crmEditForm" style="display: flex; flex-direction: column; gap: 14px;">
+          <input type="hidden" id="crm-edit-id">
+          
+          <label style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 13px; font-weight: 600; color: #64748b;">ชื่อลูกค้า</span>
+            <input type="text" id="crm-edit-name" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;" required>
+          </label>
+
+          <label style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 13px; font-weight: 600; color: #64748b;">เบอร์โทร</span>
+            <input type="text" id="crm-edit-phone" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
+          </label>
+
+          <label style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 13px; font-weight: 600; color: #64748b;">ความสนใจ</span>
+            <select id="crm-edit-interest" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
+              <option value="">-- เลือกสิ่งที่สนใจ --</option>
+              <option value="คอร์สลดน้ำหนัก">คอร์สลดน้ำหนัก</option>
+              <option value="คอร์สลดเหนียง">คอร์สลดเหนียง</option>
+              <option value="คอร์สปรับรูปหน้า">คอร์สปรับรูปหน้า</option>
+              <option value="ปรึกษาผิวหน้า">ปรึกษาผิวหน้า</option>
+              <option value="รีวิวสินค้า">รีวิวสินค้า</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </label>
+
+          <label style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 13px; font-weight: 600; color: #64748b;">แหล่งที่มา</span>
+            <input type="text" id="crm-edit-source" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
+          </label>
+
+          <div style="display: flex; gap: 12px;">
+            <label style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 13px; font-weight: 600; color: #64748b;">คะแนนลีด (0-100)</span>
+              <input type="number" id="crm-edit-score" min="0" max="100" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
+            </label>
+            <label style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 13px; font-weight: 600; color: #64748b;">สถานะติดตาม</span>
+              <select id="crm-edit-status" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
+                <option value="ลูกค้าใหม่">ลูกค้าใหม่</option>
+                <option value="ต้องติดตาม">ต้องติดตาม</option>
+                <option value="กำลังพิจารณา">กำลังพิจารณา</option>
+                <option value="จองคิว">จองคิว</option>
+                <option value="ปิดการขาย">ปิดการขาย</option>
+                <option value="ไม่สนใจ">ไม่สนใจ</option>
+              </select>
+            </label>
+          </div>
+
+          <label style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 13px; font-weight: 600; color: #64748b;">ผู้ดูแล</span>
+            <select id="crm-edit-assignee" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #dce3ea;">
+              <option value="Unassigned">ไม่มีผู้ดูแล</option>
+              <option value="Sale A">Sale A</option>
+              <option value="Sale B">Sale B</option>
+            </select>
+          </label>
+
+          <label style="display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 13px; font-weight: 600; color: #64748b;">รูปคนไข้ (ก่อนทำ / หลังทำ / รอแยก)</span>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="crm-edit-before" placeholder="ก่อนทำ" min="0" style="flex: 1; padding: 8px 10px; border-radius: 6px; border: 1px solid #dce3ea; text-align: center;">
+              <input type="number" id="crm-edit-after" placeholder="หลังทำ" min="0" style="flex: 1; padding: 8px 10px; border-radius: 6px; border: 1px solid #dce3ea; text-align: center;">
+              <input type="number" id="crm-edit-pending" placeholder="รอแยก" min="0" style="flex: 1; padding: 8px 10px; border-radius: 6px; border: 1px solid #dce3ea; text-align: center;">
+            </div>
+          </label>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+            <button type="submit" class="primary-button" style="padding: 10px 20px;">บันทึกข้อมูล</button>
+            <button type="button" class="secondary-button" onclick="closeCrmEditModal()" style="padding: 10px 20px;">ยกเลิก</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>

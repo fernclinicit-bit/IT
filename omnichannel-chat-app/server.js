@@ -22,6 +22,10 @@ const conversations = [
     sourcePost: "โฆษณาโปรเดือนนี้",
     score: 86,
     waitingMinutes: 4,
+    before_img_count: 1,
+    after_img_count: 0,
+    review_img_count: 0,
+    followup_date: "2026-07-16T12:00",
     messages: [
       ["customer", "สนใจโปรลดน้ำหนักค่ะ ราคาเริ่มต้นเท่าไหร่"],
       ["agent", "สวัสดีค่ะ ตอนนี้มีแพ็กเกจเริ่มต้น 2,900 บาท ขอเบอร์ติดต่อกลับได้ไหมคะ"],
@@ -30,6 +34,7 @@ const conversations = [
         role: "customer",
         text: "แนบรูปก่อนเริ่มให้ช่วยประเมินค่ะ",
         attachment: {
+          role: "customer",
           kind: "patient-photo",
           name: "mintra-before-photo.svg",
           type: "image/svg+xml",
@@ -51,6 +56,10 @@ const conversations = [
     sourcePost: "Rich menu",
     score: 91,
     waitingMinutes: 7,
+    before_img_count: 2,
+    after_img_count: 2,
+    review_img_count: 1,
+    followup_date: "",
     messages: [
       ["customer", "อยากจองคิวปรึกษาผิว วันเสาร์ว่างไหมครับ"],
       ["agent", "วันเสาร์มีช่วง 11:00 และ 15:30 ค่ะ สะดวกช่วงไหนคะ"],
@@ -59,6 +68,7 @@ const conversations = [
         role: "customer",
         text: "โอนเงินมัดจำแล้วครับ แนบสลิปให้ตรวจสอบ",
         attachment: {
+          role: "customer",
           kind: "payment-slip",
           name: "line-slip-ton-1530.svg",
           type: "image/svg+xml",
@@ -81,6 +91,10 @@ const conversations = [
     sourcePost: "Live comment",
     score: 54,
     waitingMinutes: 3,
+    before_img_count: 1,
+    after_img_count: 0,
+    review_img_count: 0,
+    followup_date: "2026-07-20T15:00",
     messages: [
       ["customer", "ตัวนี้เหมาะกับผิวแพ้ง่ายไหมคะ"],
       ["agent", "เหมาะกับผิวแพ้ง่ายหลายเคสค่ะ ถ้ามีประวัติแพ้สารใดเป็นพิเศษแจ้งได้เลยค่ะ"],
@@ -221,6 +235,34 @@ async function handleApi(req, res) {
     sendJson(res, 200, {
       customers: conversations.map(({ messages, ...conversation }) => conversation),
     });
+    return;
+  }
+
+  const crmMatch = url.pathname.match(/^\/api\/customers\/([^/]+)\/crm$/);
+  if (req.method === "POST" && crmMatch) {
+    const customerId = decodeURIComponent(crmMatch[1]);
+    const body = await readJsonBody(req);
+    const conversation = conversations.find((item) => item.id === customerId);
+
+    if (!conversation) {
+      sendJson(res, 404, { ok: false, error: "Customer not found" });
+      return;
+    }
+
+    if (body.name !== undefined) conversation.name = body.name;
+    if (body.phone !== undefined) conversation.phone = body.phone;
+    if (body.interest !== undefined) conversation.interest = body.interest;
+    if (body.sourcePost !== undefined) conversation.sourcePost = body.sourcePost;
+    if (body.score !== undefined) conversation.score = parseInt(body.score) || 0;
+    if (body.status !== undefined) conversation.status = body.status;
+    if (body.owner !== undefined) conversation.owner = body.owner;
+    
+    if (body.before_img_count !== undefined) conversation.before_img_count = parseInt(body.before_img_count) || 0;
+    if (body.after_img_count !== undefined) conversation.after_img_count = parseInt(body.after_img_count) || 0;
+    if (body.review_img_count !== undefined) conversation.review_img_count = parseInt(body.review_img_count) || 0;
+    if (body.followup_date !== undefined) conversation.followup_date = body.followup_date;
+
+    sendJson(res, 200, { ok: true, customer: conversation });
     return;
   }
 

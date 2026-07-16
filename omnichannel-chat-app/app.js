@@ -831,24 +831,69 @@ function renderChatMessage(conversation, message, index) {
 
 function renderProfile() {
   const item = conversations.find((conversation) => conversation.id === selectedId) || conversations[0];
-  const photoSummary = getPatientPhotoSummary(item.id);
+  if (!item) return;
+
+  const beforeVal = item.before_img_count || 0;
+  const afterVal = item.after_img_count || 0;
+  const pendingVal = item.review_img_count || 0;
   const aiState = getAiResponseState(item);
+
   profileDetail.innerHTML = `
     <div class="profile-section">
       <h3>ข้อมูลที่ดึงจากแชท</h3>
       <div class="field-list">
-        <div class="field"><span>ชื่อ</span><strong>${item.name}</strong></div>
-        <div class="field"><span>เบอร์</span><strong>${item.phone}</strong></div>
-        <div class="field"><span>สนใจ</span><strong>${item.interest}</strong></div>
-        <div class="field"><span>แหล่งที่มา</span><strong>${item.sourcePost}</strong></div>
+        <div class="field">
+          <span>ชื่อ</span>
+          <input type="text" id="crm-input-name" value="${escapeHtml(item.name || '')}" />
+        </div>
+        <div class="field">
+          <span>เบอร์</span>
+          <input type="text" id="crm-input-phone" value="${escapeHtml(item.phone || '')}" />
+        </div>
+        <div class="field">
+          <span>สนใจ</span>
+          <select id="crm-input-interest">
+            <option value="" ${!item.interest ? 'selected' : ''}>-- เลือกคอร์ส --</option>
+            <option value="คอร์สลดน้ำหนัก" ${item.interest === 'คอร์สลดน้ำหนัก' ? 'selected' : ''}>คอร์สลดน้ำหนัก</option>
+            <option value="คอร์สลดเหนียง" ${item.interest === 'คอร์สลดเหนียง' ? 'selected' : ''}>คอร์สลดเหนียง</option>
+            <option value="คอร์สปรับรูปหน้า" ${item.interest === 'คอร์สปรับรูปหน้า' ? 'selected' : ''}>คอร์สปรับรูปหน้า</option>
+            <option value="ปรึกษาผิวหน้า" ${item.interest === 'ปรึกษาผิวหน้า' ? 'selected' : ''}>ปรึกษาผิวหน้า</option>
+            <option value="รีวิวสินค้า" ${item.interest === 'รีวิวสินค้า' ? 'selected' : ''}>รีวิวสินค้า</option>
+            <option value="อื่นๆ" ${item.interest === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>แหล่งที่มา</span>
+          <input type="text" id="crm-input-source" value="${escapeHtml(item.sourcePost || '')}" />
+        </div>
       </div>
     </div>
     <div class="profile-section">
       <h3>Workflow</h3>
       <div class="field-list">
-        <div class="field"><span>คะแนน</span><strong>${item.score}/100</strong></div>
-        <div class="field"><span>สถานะ</span><strong>${item.status}</strong></div>
-        <div class="field"><span>ผู้ดูแล</span><strong>${item.owner}</strong></div>
+        <div class="field">
+          <span>คะแนน</span>
+          <input type="number" id="crm-input-score" min="0" max="100" value="${item.score || 0}" />
+        </div>
+        <div class="field">
+          <span>สถานะ</span>
+          <select id="crm-input-status">
+            <option value="ลูกค้าใหม่" ${item.status === 'ลูกค้าใหม่' ? 'selected' : ''}>ลูกค้าใหม่</option>
+            <option value="ต้องติดตาม" ${item.status === 'ต้องติดตาม' ? 'selected' : ''}>ต้องติดตาม</option>
+            <option value="กำลังพิจารณา" ${item.status === 'กำลังพิจารณา' ? 'selected' : ''}>กำลังพิจารณา</option>
+            <option value="จองคิว" ${item.status === 'จองคิว' ? 'selected' : ''}>จองคิว</option>
+            <option value="ปิดการขาย" ${item.status === 'ปิดการขาย' ? 'selected' : ''}>ปิดการขาย</option>
+            <option value="ไม่สนใจ" ${item.status === 'ไม่สนใจ' ? 'selected' : ''}>ไม่สนใจ</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>ผู้ดูแล</span>
+          <select id="crm-input-assignee">
+            <option value="Unassigned" ${item.owner === 'Unassigned' || !item.owner ? 'selected' : ''}>ไม่มีผู้ดูแล</option>
+            <option value="Sale A" ${item.owner === 'Sale A' ? 'selected' : ''}>Sale A</option>
+            <option value="Sale B" ${item.owner === 'Sale B' ? 'selected' : ''}>Sale B</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="profile-section">
@@ -860,13 +905,22 @@ function renderProfile() {
     </div>
     <div class="profile-section">
       <h3>รูปคนไข้</h3>
-      <div class="photo-summary">
-        <div><span>ก่อนทำ</span><strong>${photoSummary.before}</strong></div>
-        <div><span>หลังทำ</span><strong>${photoSummary.after}</strong></div>
-        <div><span>รอแยก</span><strong>${photoSummary.pending}</strong></div>
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
+        <div style="flex: 1; text-align: center;">
+          <span style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px;">ก่อนทำ</span>
+          <input type="number" id="crm-input-before" min="0" value="${beforeVal}" style="text-align: center; width: 100%;" />
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <span style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px;">หลังทำ</span>
+          <input type="number" id="crm-input-after" min="0" value="${afterVal}" style="text-align: center; width: 100%;" />
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <span style="font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px;">รอแยก</span>
+          <input type="number" id="crm-input-pending" min="0" value="${pendingVal}" style="text-align: center; width: 100%;" />
+        </div>
       </div>
     </div>
-    <button class="secondary-button" type="button">สร้างงานติดตาม</button>
+    <button class="primary-button" type="button" onclick="saveActiveCustomerCrm()" style="width: 100%; margin-top: 10px;">สร้างงานติดตาม</button>
   `;
 }
 
@@ -893,63 +947,94 @@ function renderWorkflow() {
 }
 
 function renderCustomers() {
-  const customers = getFilteredCustomers();
-  const slips = getStoredSlips();
-  customerRows.innerHTML = customers
-    .map(
-      (item) => {
-        const slip = slips[item.id];
-        const photoSummary = getPatientPhotoSummary(item.id);
-        const bookingAmount = getBookingAmount(item);
-        const slipTotal = getSlipTotal(item);
-        const slipAudit = getSlipAudit(item);
-        return `
-        <tr>
-          <td class="check-cell">
-            <input class="customer-checkbox" type="checkbox" value="${item.id}" aria-label="เลือกลูกค้า ${item.name}" ${selectedCustomerIds.has(item.id) ? "checked" : ""} />
-          </td>
-          <td><strong>${item.name}</strong></td>
-          <td><span class="badge ${item.channel}">${item.channel}</span></td>
-          <td>${item.phone}</td>
-          <td>${item.interest}</td>
-          <td>${item.status}</td>
-          <td><strong class="money-cell">${formatBaht(bookingAmount)} บาท</strong></td>
-          <td><strong class="money-cell ${slipTotal ? "has-amount" : ""}">${formatBaht(slipTotal)} บาท</strong></td>
-          <td>
-            <div class="slip-audit ${slipAudit.tone}">
-              <strong>${slipAudit.label}</strong>
-              <span>${slipAudit.detail}</span>
-            </div>
-          </td>
-          <td>
-            <div class="photo-summary-cell">
-              <span>ก่อนทำ ${photoSummary.before}</span>
-              <span>หลังทำ ${photoSummary.after}</span>
-              ${photoSummary.pending ? `<small>รอแยก ${photoSummary.pending}</small>` : ""}
-            </div>
-          </td>
-          <td>
-            <div class="slip-cell">
-              <span class="slip-state ${slip ? "has-slip" : ""}">${slip ? "มีสลิปแล้ว" : "ยังไม่มีสลิป"}</span>
-              <span class="slip-name">${slip ? slip.name : "-"}</span>
-              <span class="slip-total-line">ยอดสลิปรวม ${formatBaht(slipTotal)} บาท</span>
-              ${slip?.source === "chat" ? `<span class="slip-source">จากห้องแชท ${slip.sourceChannel}</span>` : ""}
-              <div class="slip-actions">
-                <button class="view-slip" type="button" data-id="${item.id}" ${slip ? "" : "disabled"}>ดู</button>
-                <button class="remove-slip" type="button" data-id="${item.id}" ${slip ? "" : "disabled"}>ลบ</button>
-              </div>
-            </div>
-          </td>
-          <td>${item.owner}</td>
-        </tr>
-      `;
-      },
-    )
-    .join("") || `
+  // Update stats cards first
+  const total = conversations.length;
+  const activeFollowups = conversations.filter(c => c.status === 'ต้องติดตาม').length;
+  const converted = conversations.filter(c => c.status === 'ปิดการขาย').length;
+  
+  // Calculate overdue SLA
+  const overdueSla = conversations.filter(c => {
+    const aiState = getAiResponseState(c);
+    return aiState.overdue;
+  }).length;
+
+  const totalCard = document.querySelector('#crmTotalLeads');
+  const activeCard = document.querySelector('#crmActiveFollowups');
+  const convertedCard = document.querySelector('#crmConvertedLeads');
+  const overdueCard = document.querySelector('#crmOverdueSla');
+
+  if (totalCard) totalCard.textContent = total;
+  if (activeCard) activeCard.textContent = activeFollowups;
+  if (convertedCard) convertedCard.textContent = converted;
+  if (overdueCard) overdueCard.textContent = overdueSla;
+
+  // Filter conversations
+  const searchQuery = document.querySelector("#crmSearchInput")?.value.trim().toLowerCase() || "";
+  const statusFilter = document.querySelector("#crmStatusFilter")?.value || "all";
+  const assigneeFilter = document.querySelector("#crmAssigneeFilter")?.value || "all";
+  const channelFilterVal = customerChannelFilter || "all";
+
+  const filtered = conversations.filter((item) => {
+    // Search filter
+    const nameVal = (item.name || "").toLowerCase();
+    const phoneVal = (item.phone || "");
+    const searchMatch = !searchQuery || nameVal.includes(searchQuery) || phoneVal.includes(searchQuery);
+
+    // Status filter
+    const statusMatch = statusFilter === "all" || item.status === statusFilter;
+
+    // Assignee filter
+    let assigneeMatch = true;
+    if (assigneeFilter !== "all") {
+      if (assigneeFilter === "Unassigned") {
+        assigneeMatch = item.owner === "Unassigned" || !item.owner;
+      } else {
+        assigneeMatch = item.owner === assigneeFilter;
+      }
+    }
+
+    // Channel filter
+    const channelMatch = channelFilterVal === "all" || item.channel === channelFilterVal;
+
+    return searchMatch && statusMatch && assigneeMatch && channelMatch;
+  });
+
+  customerRows.innerHTML = filtered.map((item) => {
+    const beforeVal = item.before_img_count || 0;
+    const afterVal = item.after_img_count || 0;
+    const pendingVal = item.review_img_count || 0;
+
+    let scoreColor = '#64748b';
+    if (item.score >= 80) scoreColor = '#126b68';
+    else if (item.score >= 50) scoreColor = '#d97706';
+    else if (item.score > 0) scoreColor = '#ef4444';
+
+    return `
       <tr>
-        <td colspan="12" class="empty-row">ไม่พบข้อมูลลูกค้าในช่องทางนี้</td>
+        <td class="check-cell">
+          <input class="customer-checkbox" type="checkbox" value="${item.id}" aria-label="เลือกลูกค้า ${item.name}" ${selectedCustomerIds.has(item.id) ? "checked" : ""} />
+        </td>
+        <td><strong>${escapeHtml(item.name)}</strong></td>
+        <td><span class="badge ${item.channel}">${item.channel}</span></td>
+        <td>${escapeHtml(item.phone || '-')}</td>
+        <td>${escapeHtml(item.interest || '-')}</td>
+        <td style="font-weight: 800; color: ${scoreColor};">${item.score || 0}</td>
+        <td>${escapeHtml(item.owner || 'ไม่มี')}</td>
+        <td>
+          <span style="font-size: 11px; color:#64748b;">ก่อน: <b>${beforeVal}</b> · หลัง: <b>${afterVal}</b> · รอ: <b>${pendingVal}</b></span>
+        </td>
+        <td><span class="slip-state ${item.status === "ปิดการขาย" ? "has-slip" : ""}">${escapeHtml(item.status || 'ลูกค้าใหม่')}</span></td>
+        <td>
+          <button class="edit-user-button table-edit" type="button" onclick="openCrmEditModal('${item.id}')" style="margin-right: 4px;">แก้ไข</button>
+          <button class="edit-user-button table-edit" type="button" onclick="navigateToChatWithCustomer('${item.id}')">แชท</button>
+        </td>
       </tr>
     `;
+  }).join("") || `
+    <tr>
+      <td colspan="10" style="text-align: center; color: #64748b; padding: 20px;">ไม่พบข้อมูลลูกค้าที่ค้นหา</td>
+    </tr>
+  `;
 
   customerRows.querySelectorAll(".customer-checkbox").forEach((checkbox) => {
     checkbox.addEventListener("change", () => {
@@ -960,14 +1045,6 @@ function renderCustomers() {
       }
       updateCustomerSelectionState();
     });
-  });
-
-  customerRows.querySelectorAll(".view-slip").forEach((button) => {
-    button.addEventListener("click", () => viewSlip(button.dataset.id));
-  });
-
-  customerRows.querySelectorAll(".remove-slip").forEach((button) => {
-    button.addEventListener("click", () => removeSlip(button.dataset.id));
   });
 
   updateCustomerSelectionState();
@@ -1578,6 +1655,170 @@ userAccountForm.addEventListener("submit", (event) => {
 
 setupChannelSettings();
 loadChannelSettings();
+
+// ==========================================
+// Clinic CRM Feature Implementations (Codex)
+// ==========================================
+
+// CRM Active Customer Update
+async function saveActiveCustomerCrm() {
+  if (!selectedId) return;
+  const conversation = conversations.find((item) => item.id === selectedId);
+  if (!conversation) return;
+
+  const name = document.getElementById('crm-input-name').value;
+  const phone = document.getElementById('crm-input-phone').value;
+  const interest = document.getElementById('crm-input-interest').value;
+  const sourcePost = document.getElementById('crm-input-source').value;
+  const score = parseInt(document.getElementById('crm-input-score').value) || 0;
+  const status = document.getElementById('crm-input-status').value;
+  const owner = document.getElementById('crm-input-assignee').value;
+  
+  const before_img_count = parseInt(document.getElementById('crm-input-before').value) || 0;
+  const after_img_count = parseInt(document.getElementById('crm-input-after').value) || 0;
+  const review_img_count = parseInt(document.getElementById('crm-input-pending').value) || 0;
+
+  const payload = {
+    name,
+    phone,
+    interest,
+    sourcePost,
+    score,
+    status,
+    owner,
+    before_img_count,
+    after_img_count,
+    review_img_count
+  };
+
+  if (apiBacked) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/customers/${encodeURIComponent(selectedId)}/crm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        await loadConversationsFromApi();
+        renderAll();
+        showToast("บันทึกข้อมูลและสร้างงานติดตามลูกค้าสำเร็จ!");
+        return;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // Fallback to local memory
+  conversation.name = name;
+  conversation.phone = phone;
+  conversation.interest = interest;
+  conversation.sourcePost = sourcePost;
+  conversation.score = score;
+  conversation.status = status;
+  conversation.owner = owner;
+  conversation.before_img_count = before_img_count;
+  conversation.after_img_count = after_img_count;
+  conversation.review_img_count = review_img_count;
+
+  renderAll();
+  showToast("บันทึกงานติดตามในเครื่องเรียบร้อยแล้ว!");
+}
+
+// CRM Edit Modal Handling
+window.openCrmEditModal = function(customerId) {
+  const customer = conversations.find(c => c.id === customerId);
+  if (!customer) return;
+
+  document.getElementById('crm-edit-id').value = customer.id;
+  document.getElementById('crm-edit-name').value = customer.name || '';
+  document.getElementById('crm-edit-phone').value = customer.phone || '';
+  document.getElementById('crm-edit-interest').value = customer.interest || '';
+  document.getElementById('crm-edit-source').value = customer.sourcePost || '';
+  document.getElementById('crm-edit-score').value = customer.score || 0;
+  document.getElementById('crm-edit-status').value = customer.status || 'ลูกค้าใหม่';
+  document.getElementById('crm-edit-assignee').value = customer.owner || 'Unassigned';
+
+  document.getElementById('crm-edit-before').value = customer.before_img_count || 0;
+  document.getElementById('crm-edit-after').value = customer.after_img_count || 0;
+  document.getElementById('crm-edit-pending').value = customer.review_img_count || 0;
+
+  const modal = document.getElementById('crmEditModal');
+  if (modal) {
+    modal.style.display = 'grid';
+    modal.classList.remove('hidden');
+  }
+}
+
+window.closeCrmEditModal = function() {
+  const modal = document.getElementById('crmEditModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }
+}
+
+// Redirect helper
+window.navigateToChatWithCustomer = function(customerId) {
+  selectedId = customerId;
+  const navBtn = document.querySelector('.nav-item[data-view="inbox"]');
+  if (navBtn) navBtn.click();
+  renderAll();
+};
+
+// Wire up event listeners
+document.querySelector("#crmSearchInput")?.addEventListener("input", renderCustomers);
+document.querySelector("#crmStatusFilter")?.addEventListener("change", renderCustomers);
+document.querySelector("#crmAssigneeFilter")?.addEventListener("change", renderCustomers);
+
+document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('crm-edit-id').value;
+  if (!id) return;
+
+  const payload = {
+    name: document.getElementById('crm-edit-name').value,
+    phone: document.getElementById('crm-edit-phone').value,
+    interest: document.getElementById('crm-edit-interest').value,
+    sourcePost: document.getElementById('crm-edit-source').value,
+    score: parseInt(document.getElementById('crm-edit-score').value) || 0,
+    status: document.getElementById('crm-edit-status').value,
+    owner: document.getElementById('crm-edit-assignee').value,
+    before_img_count: parseInt(document.getElementById('crm-edit-before').value) || 0,
+    after_img_count: parseInt(document.getElementById('crm-edit-after').value) || 0,
+    review_img_count: parseInt(document.getElementById('crm-edit-pending').value) || 0,
+  };
+
+  if (apiBacked) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/customers/${encodeURIComponent(id)}/crm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        await loadConversationsFromApi();
+        closeCrmEditModal();
+        renderAll();
+        showToast("แก้ไขข้อมูล CRM สำเร็จ!");
+        return;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // Fallback
+  const customer = conversations.find(c => c.id === id);
+  if (customer) {
+    Object.assign(customer, payload);
+  }
+  closeCrmEditModal();
+  renderAll();
+  showToast("แก้ไขข้อมูลในเครื่องสำเร็จ!");
+});
 
 async function initializeApp() {
   await loadConversationsFromApi();

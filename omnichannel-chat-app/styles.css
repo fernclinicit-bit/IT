@@ -1831,3 +1831,76 @@ tbody tr:last-child td {
     font-size: 24px;
   }
 }
+
+/* CRM Custom Styles */
+.crm-filters-container input,
+.crm-filters-container select {
+  font-family: inherit;
+  font-size: 14px;
+  color: #1e293b;
+  outline: none;
+}
+.crm-filters-container input:focus,
+.crm-filters-container select:focus {
+  border-color: var(--accent);
+}
+.modal-overlay.hidden {
+  display: none !important;
+}
+.status-pill.done {
+  background: #e6f6f4;
+  color: #126b68;
+}
+.status-pill.urgent {
+  background: #fef2f2;
+  color: #ef4444;
+}
+.status-pill.watch {
+  background: #fffbeb;
+  color: #d97706;
+}
+.photo-summary {
+  display: flex;
+  gap: 12px;
+}
+.photo-summary div {
+  flex: 1;
+  background: #f7fafc;
+  border: 1px solid #dce3ea;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+}
+.photo-summary span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.photo-summary strong {
+  font-size: 16px;
+  color: var(--dark);
+}
+.profile-section select {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #dce3ea;
+  background: #fff;
+  font-family: inherit;
+  font-size: 13px;
+}
+.profile-section input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #dce3ea;
+  background: #fff;
+  font-family: inherit;
+  font-size: 13px;
+}
+.field select,
+.field input {
+  margin-top: 4px;
+}
+
