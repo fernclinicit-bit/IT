@@ -987,7 +987,7 @@ function renderProfile() {
         </div>
         <div class="field">
           <span>วันเวลาจองคิว</span>
-          <input type="text" id="crm-input-booking-date" value="${escapeHtml(item.bookingDate || '')}" placeholder="เช่น 25 กรกฎาคม 69 เวลา 10.00 น." />
+          <input type="datetime-local" id="crm-input-booking-date" value="${item.bookingDate ? item.bookingDate.slice(0, 16) : ''}" />
         </div>
         <div class="field">
           <span>โรคประจำตัว</span>
@@ -1007,7 +1007,7 @@ function renderProfile() {
         </div>
         <div class="field">
           <span>ยอดชำระวันทำ</span>
-          <strong style="color: var(--accent); font-size: 15px;">
+          <strong id="crm-input-due-amount-display" style="color: var(--accent); font-size: 15px;">
             ${((item.casePrice || 0) - (item.bookingAmount || 0)).toLocaleString()} บาท
           </strong>
         </div>
@@ -1869,11 +1869,19 @@ window.openCrmEditModal = function(customerId) {
   document.getElementById('crm-edit-period').value = customer.period || '';
 
   document.getElementById('crm-edit-booking-doctor').value = customer.bookingDoctor || customer.doctor || '';
-  document.getElementById('crm-edit-booking-date').value = customer.bookingDate || '';
+  document.getElementById('crm-edit-booking-date').value = customer.bookingDate ? customer.bookingDate.slice(0, 16) : '';
   document.getElementById('crm-edit-underlying-disease').value = customer.underlyingDisease || '';
   document.getElementById('crm-edit-drug-allergy').value = customer.drugAllergy || '';
   document.getElementById('crm-edit-case-price').value = customer.casePrice || 0;
   document.getElementById('crm-edit-booking-amount').value = customer.bookingAmount || 0;
+
+  // Calculate and show initial due amount
+  const casePrice = customer.casePrice || 0;
+  const bookingAmount = customer.bookingAmount || 0;
+  const dueElement = document.getElementById('crm-edit-due-amount');
+  if (dueElement) {
+    dueElement.textContent = (casePrice - bookingAmount).toLocaleString() + ' บาท';
+  }
 
   document.getElementById('crm-edit-before').value = customer.before_img_count || 0;
   document.getElementById('crm-edit-after').value = customer.after_img_count || 0;
@@ -2300,3 +2308,24 @@ async function initializeApp() {
 }
 
 initializeApp();
+
+// Real-time calculation of "ยอดชำระวันทำ" (Due on Service Date)
+document.addEventListener('input', (event) => {
+  if (event.target.id === 'crm-input-case-price' || event.target.id === 'crm-input-booking-amount') {
+    const casePrice = parseInt(document.getElementById('crm-input-case-price')?.value) || 0;
+    const bookingAmount = parseInt(document.getElementById('crm-input-booking-amount')?.value) || 0;
+    const dueElement = document.getElementById('crm-input-due-amount-display');
+    if (dueElement) {
+      dueElement.textContent = (casePrice - bookingAmount).toLocaleString() + ' บาท';
+    }
+  }
+
+  if (event.target.id === 'crm-edit-case-price' || event.target.id === 'crm-edit-booking-amount') {
+    const casePrice = parseInt(document.getElementById('crm-edit-case-price')?.value) || 0;
+    const bookingAmount = parseInt(document.getElementById('crm-edit-booking-amount')?.value) || 0;
+    const dueElement = document.getElementById('crm-edit-due-amount');
+    if (dueElement) {
+      dueElement.textContent = (casePrice - bookingAmount).toLocaleString() + ' บาท';
+    }
+  }
+});

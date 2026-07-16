@@ -91,7 +91,7 @@ const conversations = [
     interest: "อื่นๆ",
     doctor: "หมอวุ้นเส้น",
     bookingDoctor: "คุณหมอวุ้นเส้น",
-    bookingDate: "25 กรกฎาคม 69 เวลา 10.00 น.",
+    bookingDate: "2026-07-25T10:00",
     underlyingDisease: "แฝงทาลัสซีเมีย",
     drugAllergy: "-",
     casePrice: 24900,
