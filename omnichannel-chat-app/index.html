@@ -233,6 +233,16 @@
               </button>
             </article>
           </div>
+
+          <!-- รายการแชทลูกค้าเพื่อสรุป -->
+          <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-top: 24px; box-shadow: var(--shadow-soft);">
+            <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 17px; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+              <span>💬</span> รายการแชทลูกค้าและสรุปโดย AI
+            </h3>
+            <div id="adminInfoChatList" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Renders dynamically -->
+            </div>
+          </div>
         </section>
 
         <section id="crmView" class="view" aria-label="ระบบ CRM">
@@ -762,6 +772,16 @@
         <!-- Chat body container -->
         <div id="crmChatModalBody" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; min-height: 0;">
           <!-- Inside here, we will render the messages and composer! -->
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Summary Modal -->
+    <div id="aiSummaryModal" class="modal hidden" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); place-items: center; z-index: 1000; padding: 16px; backdrop-filter: blur(4px);">
+      <div style="background: #ffffff; width: 100%; max-width: 480px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); overflow: hidden; display: flex; flex-direction: column; border: 1px solid #e2e8f0;">
+        <div id="ai-summary-content" style="padding: 24px;"></div>
+        <div style="background: #f8fafc; padding: 12px 24px; display: flex; justify-content: flex-end; border-top: 1px solid #f1f5f9;">
+          <button onclick="closeAiSummaryModal()" class="primary-button" style="padding: 8px 20px; font-weight: 700; font-size: 13px; border-radius: 8px;">ตกลง</button>
         </div>
       </div>
     </div>

@@ -1536,6 +1536,7 @@ function renderAll() {
   renderCustomers();
   renderUserAccounts();
   renderCrm();
+  renderAdminInfoChatList();
 }
 
 document.querySelectorAll(".nav-item").forEach((item) => {
@@ -2389,4 +2390,128 @@ window.exportCrmDataToExcel = function() {
   link.click();
   document.body.removeChild(link);
   showToast("ส่งออกข้อมูล Excel สำเร็จ!");
+};
+
+window.renderAdminInfoChatList = function() {
+  const container = document.getElementById("adminInfoChatList");
+  if (!container) return;
+
+  if (!conversations || conversations.length === 0) {
+    container.innerHTML = `<p style="font-size: 13px; color: var(--muted); text-align: center; margin: 12px 0;">ไม่มีรายการแชท</p>`;
+    return;
+  }
+
+  let html = "";
+  conversations.forEach((item) => {
+    const lastMsg = item.messages && item.messages.length > 0 
+      ? item.messages[item.messages.length - 1] 
+      : null;
+    let lastText = "ไม่มีข้อความ";
+    if (lastMsg) {
+      if (Array.isArray(lastMsg)) {
+        lastText = lastMsg[1];
+      } else if (typeof lastMsg === "object") {
+        lastText = lastMsg.text;
+      } else {
+        lastText = lastMsg;
+      }
+    }
+    const channelIcon = item.channel === "Facebook" ? "🔵" : (item.channel === "LINE" ? "🟢" : "⚫");
+
+    html += `
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-soft);">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+          <span style="font-size: 20px;">${channelIcon}</span>
+          <div style="min-width: 0; flex: 1;">
+            <strong style="font-size: 14px; color: var(--text); display: block;">${escapeHtml(item.name)}</strong>
+            <span style="font-size: 12px; color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+              ข้อความล่าสุด: ${escapeHtml(lastText)}
+            </span>
+          </div>
+        </div>
+        <button onclick="showAiChatSummary('${item.id}')" class="primary-button" style="padding: 6px 14px; font-size: 12px; font-weight: 700; border-radius: 6px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: 12px;">
+          <span>🤖</span> AI สรุปแชท
+        </button>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+};
+
+window.showAiChatSummary = function(customerId) {
+  const conversation = conversations.find(c => c.id === customerId);
+  if (!conversation) {
+    showToast("ไม่พบข้อมูลแชทนี้");
+    return;
+  }
+
+  const name = conversation.name || "ไม่ทราบชื่อ";
+  const channel = conversation.channel || "Unknown";
+  const interest = conversation.interest || "ยังไม่ได้ระบุ";
+  const lastMsg = conversation.messages && conversation.messages.length > 0 
+    ? conversation.messages[conversation.messages.length - 1] 
+    : null;
+  let lastText = "ไม่มีข้อความ";
+  if (lastMsg) {
+    if (Array.isArray(lastMsg)) {
+      lastText = lastMsg[1];
+    } else if (typeof lastMsg === "object") {
+      lastText = lastMsg.text;
+    } else {
+      lastText = lastMsg;
+    }
+  }
+
+  const summaryHtml = `
+    <div style="font-family: inherit; line-height: 1.6; color: #1e293b;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+        <span style="font-size: 24px;">🤖</span>
+        <div>
+          <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #0f172a;">AI สรุปความต้องการ - ${escapeHtml(name)}</h4>
+          <span style="font-size: 12px; color: #64748b;">วิเคราะห์จากประวัติการคุยล่าสุด (${channel})</span>
+        </div>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #f1f5f9;">
+          <strong style="font-size: 13px; color: #475569; display: block; margin-bottom: 4px;">🎯 เรื่องที่สนใจหลัก</strong>
+          <span style="font-size: 14px; font-weight: 600; color: var(--accent);">${escapeHtml(interest)}</span>
+        </div>
+        
+        <div>
+          <strong style="font-size: 13px; color: #475569; display: block; margin-bottom: 4px;">💬 ข้อความล่าสุดจากลูกค้า</strong>
+          <p style="margin: 0; font-size: 13px; background: #fff; border: 1px dashed #cbd5e1; padding: 8px 12px; border-radius: 6px; color: #334155; font-style: italic;">
+            "${escapeHtml(lastText)}"
+          </p>
+        </div>
+
+        <div>
+          <strong style="font-size: 13px; color: #475569; display: block; margin-bottom: 4px;">📝 สรุปสาระสำคัญโดย AI</strong>
+          <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #334155; display: flex; flex-direction: column; gap: 6px;">
+            <li>ลูกค้าติดต่อเข้ามาผ่านช่องทาง <strong>${channel}</strong> แสดงความสนใจเกี่ยวกับคอร์ส <strong>${interest}</strong></li>
+            <li>สถานะการจองคิวปัจจุบัน: <strong>${conversation.bookingDoctor ? `จองคิวแพทย์ ${conversation.bookingDoctor}` : 'ยังไม่ได้นัดหมายแพทย์'}</strong></li>
+            <li>ประเด็นเฝ้าระวัง/โรคประจำตัว: <strong>${conversation.underlyingDisease || '-'}</strong></li>
+            <li>สถานะติดตาม: <strong>${conversation.status || 'ยังไม่กำหนด'}</strong> (${conversation.period || 'ไม่ระบุระยะเวลา'})</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const modal = document.getElementById('aiSummaryModal');
+  const contentArea = document.getElementById('ai-summary-content');
+  if (modal && contentArea) {
+    contentArea.innerHTML = summaryHtml;
+    modal.style.display = 'grid';
+    modal.classList.remove('hidden');
+  }
+};
+
+window.closeAiSummaryModal = function() {
+  const modal = document.getElementById('aiSummaryModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+  }
 };
