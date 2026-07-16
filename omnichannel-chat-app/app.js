@@ -883,11 +883,20 @@ function renderProfile() {
           <span>สนใจ</span>
           <select id="crm-input-interest">
             <option value="" ${!item.interest ? 'selected' : ''}>-- เลือกคอร์ส --</option>
-            <option value="คอร์สลดน้ำหนัก" ${item.interest === 'คอร์สลดน้ำหนัก' ? 'selected' : ''}>คอร์สลดน้ำหนัก</option>
-            <option value="คอร์สลดเหนียง" ${item.interest === 'คอร์สลดเหนียง' ? 'selected' : ''}>คอร์สลดเหนียง</option>
-            <option value="คอร์สปรับรูปหน้า" ${item.interest === 'คอร์สปรับรูปหน้า' ? 'selected' : ''}>คอร์สปรับรูปหน้า</option>
-            <option value="ปรึกษาผิวหน้า" ${item.interest === 'ปรึกษาผิวหน้า' ? 'selected' : ''}>ปรึกษาผิวหน้า</option>
-            <option value="รีวิวสินค้า" ${item.interest === 'รีวิวสินค้า' ? 'selected' : ''}>รีวิวสินค้า</option>
+            <option value="SBL" ${item.interest === 'SBL' ? 'selected' : ''}>SBL</option>
+            <option value="DBL" ${item.interest === 'DBL' ? 'selected' : ''}>DBL</option>
+            <option value="Skin" ${item.interest === 'Skin' ? 'selected' : ''}>Skin</option>
+            <option value="ตา2ชั้น" ${item.interest === 'ตา2ชั้น' ? 'selected' : ''}>ตา2ชั้น</option>
+            <option value="เสริมจมูก" ${item.interest === 'เสริมจมูก' ? 'selected' : ''}>เสริมจมูก</option>
+            <option value="ตัดปีกจมูก" ${item.interest === 'ตัดปีกจมูก' ? 'selected' : ''}>ตัดปีกจมูก</option>
+            <option value="ดึงขมับ" ${item.interest === 'ดึงขมับ' ? 'selected' : ''}>ดึงขมับ</option>
+            <option value="ยกคิ้ว" ${item.interest === 'ยกคิ้ว' ? 'selected' : ''}>ยกคิ้ว</option>
+            <option value="ถุงใต้ตา" ${item.interest === 'ถุงใต้ตา' ? 'selected' : ''}>ถุงใต้ตา</option>
+            <option value="ดูดเหนียง" ${item.interest === 'ดูดเหนียง' ? 'selected' : ''}>ดูดเหนียง</option>
+            <option value="เย็บเก็บแผล" ${item.interest === 'เย็บเก็บแผล' ? 'selected' : ''}>เย็บเก็บแผล</option>
+            <option value="แก้กล้ามเนื้อตาอ่อนแรง" ${item.interest === 'แก้กล้ามเนื้อตาอ่อนแรง' ? 'selected' : ''}>แก้กล้ามเนื้อตาอ่อนแรง</option>
+            <option value="เสริมคาง" ${item.interest === 'เสริมคาง' ? 'selected' : ''}>เสริมคาง</option>
+            <option value="ตัดถุงใต้ตา" ${item.interest === 'ตัดถุงใต้ตา' ? 'selected' : ''}>ตัดถุงใต้ตา</option>
             <option value="อื่นๆ" ${item.interest === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
           </select>
         </div>
@@ -2083,11 +2092,20 @@ function renderCrmProfile() {
           <span>สนใจ</span>
           <select id="crm-tab-input-interest">
             <option value="" ${!item.interest ? 'selected' : ''}>-- เลือกคอร์ส --</option>
-            <option value="คอร์สลดน้ำหนัก" ${item.interest === 'คอร์สลดน้ำหนัก' ? 'selected' : ''}>คอร์สลดน้ำหนัก</option>
-            <option value="คอร์สลดเหนียง" ${item.interest === 'คอร์สลดเหนียง' ? 'selected' : ''}>คอร์สลดเหนียง</option>
-            <option value="คอร์สปรับรูปหน้า" ${item.interest === 'คอร์สปรับรูปหน้า' ? 'selected' : ''}>คอร์สปรับรูปหน้า</option>
-            <option value="ปรึกษาผิวหน้า" ${item.interest === 'ปรึกษาผิวหน้า' ? 'selected' : ''}>ปรึกษาผิวหน้า</option>
-            <option value="รีวิวสินค้า" ${item.interest === 'รีวิวสินค้า' ? 'selected' : ''}>รีวิวสินค้า</option>
+            <option value="SBL" ${item.interest === 'SBL' ? 'selected' : ''}>SBL</option>
+            <option value="DBL" ${item.interest === 'DBL' ? 'selected' : ''}>DBL</option>
+            <option value="Skin" ${item.interest === 'Skin' ? 'selected' : ''}>Skin</option>
+            <option value="ตา2ชั้น" ${item.interest === 'ตา2ชั้น' ? 'selected' : ''}>ตา2ชั้น</option>
+            <option value="เสริมจมูก" ${item.interest === 'เสริมจมูก' ? 'selected' : ''}>เสริมจมูก</option>
+            <option value="ตัดปีกจมูก" ${item.interest === 'ตัดปีกจมูก' ? 'selected' : ''}>ตัดปีกจมูก</option>
+            <option value="ดึงขมับ" ${item.interest === 'ดึงขมับ' ? 'selected' : ''}>ดึงขมับ</option>
+            <option value="ยกคิ้ว" ${item.interest === 'ยกคิ้ว' ? 'selected' : ''}>ยกคิ้ว</option>
+            <option value="ถุงใต้ตา" ${item.interest === 'ถุงใต้ตา' ? 'selected' : ''}>ถุงใต้ตา</option>
+            <option value="ดูดเหนียง" ${item.interest === 'ดูดเหนียง' ? 'selected' : ''}>ดูดเหนียง</option>
+            <option value="เย็บเก็บแผล" ${item.interest === 'เย็บเก็บแผล' ? 'selected' : ''}>เย็บเก็บแผล</option>
+            <option value="แก้กล้ามเนื้อตาอ่อนแรง" ${item.interest === 'แก้กล้ามเนื้อตาอ่อนแรง' ? 'selected' : ''}>แก้กล้ามเนื้อตาอ่อนแรง</option>
+            <option value="เสริมคาง" ${item.interest === 'เสริมคาง' ? 'selected' : ''}>เสริมคาง</option>
+            <option value="ตัดถุงใต้ตา" ${item.interest === 'ตัดถุงใต้ตา' ? 'selected' : ''}>ตัดถุงใต้ตา</option>
             <option value="อื่นๆ" ${item.interest === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
           </select>
         </div>
