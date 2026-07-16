@@ -30,10 +30,16 @@
               <span>ข้อมูล</span>
             </button>
           </div>
-          <button class="nav-item" type="button" data-view="crm">
-            <span class="icon">⚇</span>
-            <span>ระบบ CRM</span>
-          </button>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <button class="nav-item" type="button" data-view="crm">
+              <span class="icon">⚇</span>
+              <span>ระบบ CRM</span>
+            </button>
+            <button class="nav-item sub-nav-item" type="button" data-view="crmInfo" style="padding-left: 36px; min-height: 36px; font-size: 13px; opacity: 0.85;">
+              <span class="icon" style="font-size: 12px; width: 20px; height: 20px; color: #f2c94c;">📄</span>
+              <span>ข้อมูล</span>
+            </button>
+          </div>
           <button class="nav-item" type="button" data-view="dashboard">
             <span class="icon">▦</span>
             <span>ดูแดชบอร์ด</span>
@@ -240,6 +246,58 @@
               <span>💬</span> รายการแชทลูกค้าและสรุปโดย AI
             </h3>
             <div id="adminInfoChatList" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Renders dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ข้อมูล ระบบ CRM View -->
+        <section id="crmInfoView" class="view" aria-label="ข้อมูล ระบบ CRM" style="padding: 24px;">
+          <div class="dashboard-head" style="margin-bottom: 24px;">
+            <div>
+              <p class="eyebrow" style="text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: var(--muted); font-weight: 700; margin-bottom: 4px;">CRM System Info</p>
+              <h2 style="font-size: 24px; color: var(--text); font-weight: 800; margin: 0;">ข้อมูล ระบบ CRM</h2>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <!-- สรุปสถิติเคส -->
+            <article style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-soft);">
+              <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--accent);">📈</span> คอร์สที่สนใจยอดนิยม
+              </h3>
+              <div id="crm-top-interests" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+                <!-- Renders dynamically -->
+              </div>
+            </article>
+
+            <!-- สรุปสถานะการติดตาม -->
+            <article style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-soft);">
+              <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--accent);">⏳</span> สรุปสถานะการติดตาม
+              </h3>
+              <div id="crm-status-summary" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+                <!-- Renders dynamically -->
+              </div>
+            </article>
+
+            <!-- การกระจายงานผู้ดูแล -->
+            <article style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-soft);">
+              <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--accent);">👥</span> การมอบหมายผู้ดูแล
+              </h3>
+              <div id="crm-assignee-summary" style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+                <!-- Renders dynamically -->
+              </div>
+            </article>
+          </div>
+
+          <!-- รายการแชทลูกค้าเพื่อสรุป CRM -->
+          <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-top: 24px; box-shadow: var(--shadow-soft);">
+            <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 17px; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 8px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+              <span>💬</span> รายการแชทลูกค้าและสรุปโดย AI
+            </h3>
+            <div id="crmInfoChatList" style="display: flex; flex-direction: column; gap: 12px;">
               <!-- Renders dynamically -->
             </div>
           </div>

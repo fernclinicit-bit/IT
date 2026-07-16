@@ -1537,6 +1537,7 @@ function renderAll() {
   renderUserAccounts();
   renderCrm();
   renderAdminInfoChatList();
+  renderCrmInfo();
 }
 
 document.querySelectorAll(".nav-item").forEach((item) => {
@@ -2513,5 +2514,125 @@ window.closeAiSummaryModal = function() {
   if (modal) {
     modal.style.display = 'none';
     modal.classList.add('hidden');
+  }
+};
+
+window.renderCrmInfo = function() {
+  // 1. Calculate Stats
+  const interestsMap = {};
+  const statusMap = {};
+  const assigneeMap = {};
+
+  conversations.forEach((item) => {
+    // Interest
+    const interest = item.interest || "อื่นๆ";
+    interestsMap[interest] = (interestsMap[interest] || 0) + 1;
+
+    // Status
+    const status = item.status || "ไม่ได้ระบุ";
+    statusMap[status] = (statusMap[status] || 0) + 1;
+
+    // Assignee
+    const owner = item.owner || "ไม่มีผู้ดูแล";
+    assigneeMap[owner] = (assigneeMap[owner] || 0) + 1;
+  });
+
+  // Render Top Interests
+  const topInterestsContainer = document.getElementById("crm-top-interests");
+  if (topInterestsContainer) {
+    const sortedInterests = Object.entries(interestsMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const maxVal = sortedInterests[0] ? sortedInterests[0][1] : 1;
+    let html = "";
+    sortedInterests.forEach(([key, val]) => {
+      const pct = (val / maxVal) * 100;
+      html += `
+        <div style="margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <strong style="color: var(--text);">${escapeHtml(key)}</strong>
+            <span style="color: var(--muted);">${val} เคส</span>
+          </div>
+          <div style="height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+            <div style="height: 100%; width: ${pct}%; background: var(--accent); border-radius: 3px;"></div>
+          </div>
+        </div>
+      `;
+    });
+    topInterestsContainer.innerHTML = html || `<p style="font-size: 13px; color: var(--muted);">ไม่มีข้อมูล</p>`;
+  }
+
+  // Render Status Summary
+  const statusSummaryContainer = document.getElementById("crm-status-summary");
+  if (statusSummaryContainer) {
+    let html = "";
+    Object.entries(statusMap).forEach(([key, val]) => {
+      html += `
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--line); padding-bottom: 6px; margin-bottom: 6px;">
+          <span style="color: var(--muted);">${escapeHtml(key)}</span>
+          <strong style="color: var(--text);">${val} เคส</strong>
+        </div>
+      `;
+    });
+    statusSummaryContainer.innerHTML = html || `<p style="font-size: 13px; color: var(--muted);">ไม่มีข้อมูล</p>`;
+  }
+
+  // Render Assignee Summary
+  const assigneeSummaryContainer = document.getElementById("crm-assignee-summary");
+  if (assigneeSummaryContainer) {
+    let html = "";
+    Object.entries(assigneeMap).forEach(([key, val]) => {
+      html += `
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--line); padding-bottom: 6px; margin-bottom: 6px;">
+          <span style="color: var(--muted);">${escapeHtml(key)}</span>
+          <strong style="color: var(--text);">${val} เคส</strong>
+        </div>
+      `;
+    });
+    assigneeSummaryContainer.innerHTML = html || `<p style="font-size: 13px; color: var(--muted);">ไม่มีข้อมูล</p>`;
+  }
+
+  // Render CRM Info Chat List
+  const container = document.getElementById("crmInfoChatList");
+  if (container) {
+    if (!conversations || conversations.length === 0) {
+      container.innerHTML = `<p style="font-size: 13px; color: var(--muted); text-align: center; margin: 12px 0;">ไม่มีรายการแชท</p>`;
+      return;
+    }
+
+    let html = "";
+    conversations.forEach((item) => {
+      const lastMsg = item.messages && item.messages.length > 0 
+        ? item.messages[item.messages.length - 1] 
+        : null;
+      let lastText = "ไม่มีข้อความ";
+      if (lastMsg) {
+        if (Array.isArray(lastMsg)) {
+          lastText = lastMsg[1];
+        } else if (typeof lastMsg === "object") {
+          lastText = lastMsg.text;
+        } else {
+          lastText = lastMsg;
+        }
+      }
+      const channelIcon = item.channel === "Facebook" ? "🔵" : (item.channel === "LINE" ? "🟢" : "⚫");
+
+      html += `
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-soft);">
+          <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+            <span style="font-size: 20px;">${channelIcon}</span>
+            <div style="min-width: 0; flex: 1;">
+              <strong style="font-size: 14px; color: var(--text); display: block;">${escapeHtml(item.name)}</strong>
+              <span style="font-size: 12px; color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                ข้อความล่าสุด: ${escapeHtml(lastText)}
+              </span>
+            </div>
+          </div>
+          <button onclick="showAiChatSummary('${item.id}')" class="primary-button" style="padding: 6px 14px; font-size: 12px; font-weight: 700; border-radius: 6px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: 12px;">
+            <span>🤖</span> AI สรุปแชท
+          </button>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
   }
 };
