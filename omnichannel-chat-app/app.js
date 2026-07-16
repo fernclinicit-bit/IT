@@ -63,13 +63,18 @@ let conversations = [
     id: "line-022",
     channel: "LINE",
     lineAccount: 2,
-    name: "คุณวิภา (LINE Acc 2)",
+    name: "คุณ ศิรินทิพย์ วงศ์ปิง (LINE Acc 2)",
     time: "10:15",
     owner: "Sale B",
     status: "ตามครั้งที่ 1",
-    phone: "081-992-3344",
-    interest: "คอร์สปรับรูปหน้า",
-    bookingAmount: 1500,
+    phone: "064-560-8454",
+    interest: "อื่นๆ",
+    bookingDoctor: "คุณหมอวุ้นเส้น",
+    bookingDate: "25 กรกฎาคม 69 เวลา 10.00 น.",
+    underlyingDisease: "แฝงทาลัสซีเมีย",
+    drugAllergy: "-",
+    casePrice: 24900,
+    bookingAmount: 3000,
     sourcePost: "ต้องติดตาม",
     score: 78,
     waitingMinutes: 0,
@@ -930,6 +935,41 @@ function renderProfile() {
       </div>
     </div>
     <div class="profile-section">
+      <h3>ข้อมูลการจองคิว</h3>
+      <div class="field-list">
+        <div class="field">
+          <span>แพทย์ที่จอง</span>
+          <input type="text" id="crm-input-booking-doctor" value="${escapeHtml(item.bookingDoctor || '')}" />
+        </div>
+        <div class="field">
+          <span>วันเวลาจองคิว</span>
+          <input type="text" id="crm-input-booking-date" value="${escapeHtml(item.bookingDate || '')}" placeholder="เช่น 25 กรกฎาคม 69 เวลา 10.00 น." />
+        </div>
+        <div class="field">
+          <span>โรคประจำตัว</span>
+          <input type="text" id="crm-input-underlying-disease" value="${escapeHtml(item.underlyingDisease || '')}" />
+        </div>
+        <div class="field">
+          <span>ประวัติแพ้ยา</span>
+          <input type="text" id="crm-input-drug-allergy" value="${escapeHtml(item.drugAllergy || '')}" />
+        </div>
+        <div class="field">
+          <span>ราคาเคส (บาท)</span>
+          <input type="number" id="crm-input-case-price" min="0" value="${item.casePrice || 0}" />
+        </div>
+        <div class="field">
+          <span>เงินมัดจำ (บาท)</span>
+          <input type="number" id="crm-input-booking-amount" min="0" value="${item.bookingAmount || 0}" />
+        </div>
+        <div class="field">
+          <span>ยอดชำระวันทำ</span>
+          <strong style="color: var(--accent); font-size: 15px;">
+            ${((item.casePrice || 0) - (item.bookingAmount || 0)).toLocaleString()} บาท
+          </strong>
+        </div>
+      </div>
+    </div>
+    <div class="profile-section">
       <h3>AI ตอบแชท</h3>
       <div class="field-list">
         <div class="field"><span>SLA</span><strong>ไม่เกิน ${AI_RESPONSE_LIMIT_MINUTES} นาที</strong></div>
@@ -1687,6 +1727,13 @@ async function saveActiveCustomerCrm() {
   const score = parseInt(document.getElementById('crm-input-score').value) || 0;
   const status = document.getElementById('crm-input-status').value;
   const owner = document.getElementById('crm-input-assignee').value;
+
+  const bookingDoctor = document.getElementById('crm-input-booking-doctor').value;
+  const bookingDate = document.getElementById('crm-input-booking-date').value;
+  const underlyingDisease = document.getElementById('crm-input-underlying-disease').value;
+  const drugAllergy = document.getElementById('crm-input-drug-allergy').value;
+  const casePrice = parseInt(document.getElementById('crm-input-case-price').value) || 0;
+  const bookingAmount = parseInt(document.getElementById('crm-input-booking-amount').value) || 0;
   
   const before_img_count = parseInt(document.getElementById('crm-input-before').value) || 0;
   const after_img_count = parseInt(document.getElementById('crm-input-after').value) || 0;
@@ -1700,6 +1747,12 @@ async function saveActiveCustomerCrm() {
     score,
     status,
     owner,
+    bookingDoctor,
+    bookingDate,
+    underlyingDisease,
+    drugAllergy,
+    casePrice,
+    bookingAmount,
     before_img_count,
     after_img_count,
     review_img_count
@@ -1732,6 +1785,12 @@ async function saveActiveCustomerCrm() {
   conversation.score = score;
   conversation.status = status;
   conversation.owner = owner;
+  conversation.bookingDoctor = bookingDoctor;
+  conversation.bookingDate = bookingDate;
+  conversation.underlyingDisease = underlyingDisease;
+  conversation.drugAllergy = drugAllergy;
+  conversation.casePrice = casePrice;
+  conversation.bookingAmount = bookingAmount;
   conversation.before_img_count = before_img_count;
   conversation.after_img_count = after_img_count;
   conversation.review_img_count = review_img_count;
@@ -1751,8 +1810,15 @@ window.openCrmEditModal = function(customerId) {
   document.getElementById('crm-edit-interest').value = customer.interest || '';
   document.getElementById('crm-edit-source').value = customer.sourcePost || '';
   document.getElementById('crm-edit-score').value = customer.score || 0;
-  document.getElementById('crm-edit-status').value = customer.status || 'ลูกค้าใหม่';
+  document.getElementById('crm-edit-status').value = customer.status || 'ตามครั้งที่ 1';
   document.getElementById('crm-edit-assignee').value = customer.owner || 'Unassigned';
+
+  document.getElementById('crm-edit-booking-doctor').value = customer.bookingDoctor || '';
+  document.getElementById('crm-edit-booking-date').value = customer.bookingDate || '';
+  document.getElementById('crm-edit-underlying-disease').value = customer.underlyingDisease || '';
+  document.getElementById('crm-edit-drug-allergy').value = customer.drugAllergy || '';
+  document.getElementById('crm-edit-case-price').value = customer.casePrice || 0;
+  document.getElementById('crm-edit-booking-amount').value = customer.bookingAmount || 0;
 
   document.getElementById('crm-edit-before').value = customer.before_img_count || 0;
   document.getElementById('crm-edit-after').value = customer.after_img_count || 0;
@@ -1799,6 +1865,12 @@ document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => 
     score: parseInt(document.getElementById('crm-edit-score').value) || 0,
     status: document.getElementById('crm-edit-status').value,
     owner: document.getElementById('crm-edit-assignee').value,
+    bookingDoctor: document.getElementById('crm-edit-booking-doctor').value,
+    bookingDate: document.getElementById('crm-edit-booking-date').value,
+    underlyingDisease: document.getElementById('crm-edit-underlying-disease').value,
+    drugAllergy: document.getElementById('crm-edit-drug-allergy').value,
+    casePrice: parseInt(document.getElementById('crm-edit-case-price').value) || 0,
+    bookingAmount: parseInt(document.getElementById('crm-edit-booking-amount').value) || 0,
     before_img_count: parseInt(document.getElementById('crm-edit-before').value) || 0,
     after_img_count: parseInt(document.getElementById('crm-edit-after').value) || 0,
     review_img_count: parseInt(document.getElementById('crm-edit-pending').value) || 0,
@@ -2031,6 +2103,41 @@ function renderCrmProfile() {
       </div>
     </div>
     <div class="profile-section">
+      <h3>ข้อมูลการจองคิว</h3>
+      <div class="field-list">
+        <div class="field">
+          <span>แพทย์ที่จอง</span>
+          <input type="text" id="crm-tab-input-booking-doctor" value="${escapeHtml(item.bookingDoctor || '')}" />
+        </div>
+        <div class="field">
+          <span>วันเวลาจองคิว</span>
+          <input type="text" id="crm-tab-input-booking-date" value="${escapeHtml(item.bookingDate || '')}" placeholder="เช่น 25 กรกฎาคม 69 เวลา 10.00 น." />
+        </div>
+        <div class="field">
+          <span>โรคประจำตัว</span>
+          <input type="text" id="crm-tab-input-underlying-disease" value="${escapeHtml(item.underlyingDisease || '')}" />
+        </div>
+        <div class="field">
+          <span>ประวัติแพ้ยา</span>
+          <input type="text" id="crm-tab-input-drug-allergy" value="${escapeHtml(item.drugAllergy || '')}" />
+        </div>
+        <div class="field">
+          <span>ราคาเคส (บาท)</span>
+          <input type="number" id="crm-tab-input-case-price" min="0" value="${item.casePrice || 0}" />
+        </div>
+        <div class="field">
+          <span>เงินมัดจำ (บาท)</span>
+          <input type="number" id="crm-tab-input-booking-amount" min="0" value="${item.bookingAmount || 0}" />
+        </div>
+        <div class="field">
+          <span>ยอดชำระวันทำ</span>
+          <strong style="color: var(--accent); font-size: 15px;">
+            ${((item.casePrice || 0) - (item.bookingAmount || 0)).toLocaleString()} บาท
+          </strong>
+        </div>
+      </div>
+    </div>
+    <div class="profile-section">
       <h3>AI ตอบแชท</h3>
       <div class="field-list">
         <div class="field"><span>SLA</span><strong>ไม่เกิน ${AI_RESPONSE_LIMIT_MINUTES} นาที</strong></div>
@@ -2070,6 +2177,13 @@ window.saveActiveCustomerCrmFromTab = async function() {
   const score = parseInt(document.getElementById('crm-tab-input-score').value) || 0;
   const status = document.getElementById('crm-tab-input-status').value;
   const owner = document.getElementById('crm-tab-input-assignee').value;
+
+  const bookingDoctor = document.getElementById('crm-tab-input-booking-doctor').value;
+  const bookingDate = document.getElementById('crm-tab-input-booking-date').value;
+  const underlyingDisease = document.getElementById('crm-tab-input-underlying-disease').value;
+  const drugAllergy = document.getElementById('crm-tab-input-drug-allergy').value;
+  const casePrice = parseInt(document.getElementById('crm-tab-input-case-price').value) || 0;
+  const bookingAmount = parseInt(document.getElementById('crm-tab-input-booking-amount').value) || 0;
   
   const before_img_count = parseInt(document.getElementById('crm-tab-input-before').value) || 0;
   const after_img_count = parseInt(document.getElementById('crm-tab-input-after').value) || 0;
@@ -2083,6 +2197,12 @@ window.saveActiveCustomerCrmFromTab = async function() {
     score,
     status,
     owner,
+    bookingDoctor,
+    bookingDate,
+    underlyingDisease,
+    drugAllergy,
+    casePrice,
+    bookingAmount,
     before_img_count,
     after_img_count,
     review_img_count

@@ -83,13 +83,18 @@ const conversations = [
     id: "line-022",
     channel: "LINE",
     lineAccount: 2,
-    name: "คุณวิภา (LINE Acc 2)",
+    name: "คุณ ศิรินทิพย์ วงศ์ปิง (LINE Acc 2)",
     time: "10:15",
     owner: "Sale B",
     status: "ตามครั้งที่ 1",
-    phone: "081-992-3344",
-    interest: "คอร์สปรับรูปหน้า",
-    bookingAmount: 1500,
+    phone: "064-560-8454",
+    interest: "อื่นๆ",
+    bookingDoctor: "คุณหมอวุ้นเส้น",
+    bookingDate: "25 กรกฎาคม 69 เวลา 10.00 น.",
+    underlyingDisease: "แฝงทาลัสซีเมีย",
+    drugAllergy: "-",
+    casePrice: 24900,
+    bookingAmount: 3000,
     sourcePost: "ต้องติดตาม",
     score: 78,
     waitingMinutes: 0,
@@ -285,6 +290,13 @@ async function handleApi(req, res) {
     if (body.after_img_count !== undefined) conversation.after_img_count = parseInt(body.after_img_count) || 0;
     if (body.review_img_count !== undefined) conversation.review_img_count = parseInt(body.review_img_count) || 0;
     if (body.followup_date !== undefined) conversation.followup_date = body.followup_date;
+
+    if (body.bookingDoctor !== undefined) conversation.bookingDoctor = body.bookingDoctor;
+    if (body.bookingDate !== undefined) conversation.bookingDate = body.bookingDate;
+    if (body.underlyingDisease !== undefined) conversation.underlyingDisease = body.underlyingDisease;
+    if (body.drugAllergy !== undefined) conversation.drugAllergy = body.drugAllergy;
+    if (body.casePrice !== undefined) conversation.casePrice = parseInt(body.casePrice) || 0;
+    if (body.bookingAmount !== undefined) conversation.bookingAmount = parseInt(body.bookingAmount) || 0;
 
     sendJson(res, 200, { ok: true, customer: conversation });
     return;
