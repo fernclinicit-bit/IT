@@ -957,12 +957,18 @@ function renderProfile() {
             <option value="" ${!item.photoDelivery ? 'selected' : ''}>-- เลือกสถานะส่งรูป --</option>
             <option value="ส่งรูปแล้ว" ${item.photoDelivery === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
             <option value="ไม่มีการส่งรูป" ${item.photoDelivery === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
-            <option value="หลังทำทันที่" ${item.photoDelivery === 'หลังทำทันที่' ? 'selected' : ''}>หลังทำทันที่</option>
-            <option value="ก่อนตัดไหม" ${item.photoDelivery === 'ก่อนตัดไหม' ? 'selected' : ''}>ก่อนตัดไหม</option>
-            <option value="ระหว่าง 1 เดือน" ${item.photoDelivery === 'ระหว่าง 1 เดือน' ? 'selected' : ''}>ระหว่าง 1 เดือน</option>
-            <option value="ระหว่าง 3 เดือน" ${item.photoDelivery === 'ระหว่าง 3 เดือน' ? 'selected' : ''}>ระหว่าง 3 เดือน</option>
-            <option value="ระหว่าง 6 เดือน" ${item.photoDelivery === 'ระหว่าง 6 เดือน' ? 'selected' : ''}>ระหว่าง 6 เดือน</option>
-            <option value="ระหว่าง 1 ปี" ${item.photoDelivery === 'ระหว่าง 1 ปี' ? 'selected' : ''}>ระหว่าง 1 ปี</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>ระยะเวลา</span>
+          <select id="crm-input-period">
+            <option value="" ${!item.period ? 'selected' : ''}>-- เลือกระยะเวลา --</option>
+            <option value="หลังทำทันที" ${item.period === 'หลังทำทันที' ? 'selected' : ''}>หลังทำทันที</option>
+            <option value="ก่อนตัดไหม" ${item.period === 'ก่อนตัดไหม' ? 'selected' : ''}>ก่อนตัดไหม</option>
+            <option value="ระหว่าง 1 เดือน" ${item.period === 'ระหว่าง 1 เดือน' ? 'selected' : ''}>ระหว่าง 1 เดือน</option>
+            <option value="ระหว่าง 3 เดือน" ${item.period === 'ระหว่าง 3 เดือน' ? 'selected' : ''}>ระหว่าง 3 เดือน</option>
+            <option value="ระหว่าง 6 เดือน" ${item.period === 'ระหว่าง 6 เดือน' ? 'selected' : ''}>ระหว่าง 6 เดือน</option>
+            <option value="ระหว่าง 1 ปี" ${item.period === 'ระหว่าง 1 ปี' ? 'selected' : ''}>ระหว่าง 1 ปี</option>
           </select>
         </div>
         <div class="field">
@@ -1769,6 +1775,7 @@ async function saveActiveCustomerCrm() {
   const score = parseInt(document.getElementById('crm-input-score').value) || 0;
   const status = document.getElementById('crm-input-status').value;
   const photoDelivery = document.getElementById('crm-input-photo-delivery').value;
+  const period = document.getElementById('crm-input-period').value;
   const owner = document.getElementById('crm-input-assignee').value;
 
   const bookingDoctor = document.getElementById('crm-input-booking-doctor').value;
@@ -1791,6 +1798,7 @@ async function saveActiveCustomerCrm() {
     score,
     status,
     photoDelivery,
+    period,
     owner,
     bookingDoctor,
     bookingDate,
@@ -1831,6 +1839,7 @@ async function saveActiveCustomerCrm() {
   conversation.score = score;
   conversation.status = status;
   conversation.photoDelivery = photoDelivery;
+  conversation.period = period;
   conversation.owner = owner;
   conversation.bookingDoctor = bookingDoctor;
   conversation.bookingDate = bookingDate;
@@ -1861,6 +1870,7 @@ window.openCrmEditModal = function(customerId) {
   document.getElementById('crm-edit-photo-delivery').value = customer.photoDelivery || '';
   document.getElementById('crm-edit-assignee').value = customer.owner || 'Unassigned';
   document.getElementById('crm-edit-doctor').value = customer.doctor || '';
+  document.getElementById('crm-edit-period').value = customer.period || '';
 
   document.getElementById('crm-edit-booking-doctor').value = customer.bookingDoctor || '';
   document.getElementById('crm-edit-booking-date').value = customer.bookingDate || '';
@@ -1914,6 +1924,7 @@ document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => 
     score: parseInt(document.getElementById('crm-edit-score').value) || 0,
     status: document.getElementById('crm-edit-status').value,
     photoDelivery: document.getElementById('crm-edit-photo-delivery').value,
+    period: document.getElementById('crm-edit-period').value,
     owner: document.getElementById('crm-edit-assignee').value,
     doctor: document.getElementById('crm-edit-doctor').value,
     bookingDoctor: document.getElementById('crm-edit-booking-doctor').value,
@@ -2176,12 +2187,18 @@ function renderCrmProfile() {
             <option value="" ${!item.photoDelivery ? 'selected' : ''}>-- เลือกสถานะส่งรูป --</option>
             <option value="ส่งรูปแล้ว" ${item.photoDelivery === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
             <option value="ไม่มีการส่งรูป" ${item.photoDelivery === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
-            <option value="หลังทำทันที่" ${item.photoDelivery === 'หลังทำทันที่' ? 'selected' : ''}>หลังทำทันที่</option>
-            <option value="ก่อนตัดไหม" ${item.photoDelivery === 'ก่อนตัดไหม' ? 'selected' : ''}>ก่อนตัดไหม</option>
-            <option value="ระหว่าง 1 เดือน" ${item.photoDelivery === 'ระหว่าง 1 เดือน' ? 'selected' : ''}>ระหว่าง 1 เดือน</option>
-            <option value="ระหว่าง 3 เดือน" ${item.photoDelivery === 'ระหว่าง 3 เดือน' ? 'selected' : ''}>ระหว่าง 3 เดือน</option>
-            <option value="ระหว่าง 6 เดือน" ${item.photoDelivery === 'ระหว่าง 6 เดือน' ? 'selected' : ''}>ระหว่าง 6 เดือน</option>
-            <option value="ระหว่าง 1 ปี" ${item.photoDelivery === 'ระหว่าง 1 ปี' ? 'selected' : ''}>ระหว่าง 1 ปี</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>ระยะเวลา</span>
+          <select id="crm-tab-input-period">
+            <option value="" ${!item.period ? 'selected' : ''}>-- เลือกระยะเวลา --</option>
+            <option value="หลังทำทันที" ${item.period === 'หลังทำทันที' ? 'selected' : ''}>หลังทำทันที</option>
+            <option value="ก่อนตัดไหม" ${item.period === 'ก่อนตัดไหม' ? 'selected' : ''}>ก่อนตัดไหม</option>
+            <option value="ระหว่าง 1 เดือน" ${item.period === 'ระหว่าง 1 เดือน' ? 'selected' : ''}>ระหว่าง 1 เดือน</option>
+            <option value="ระหว่าง 3 เดือน" ${item.period === 'ระหว่าง 3 เดือน' ? 'selected' : ''}>ระหว่าง 3 เดือน</option>
+            <option value="ระหว่าง 6 เดือน" ${item.period === 'ระหว่าง 6 เดือน' ? 'selected' : ''}>ระหว่าง 6 เดือน</option>
+            <option value="ระหว่าง 1 ปี" ${item.period === 'ระหว่าง 1 ปี' ? 'selected' : ''}>ระหว่าง 1 ปี</option>
           </select>
         </div>
         <div class="field">
@@ -2235,6 +2252,7 @@ window.saveActiveCustomerCrmFromTab = async function() {
   const score = parseInt(document.getElementById('crm-tab-input-score').value) || 0;
   const status = document.getElementById('crm-tab-input-status').value;
   const photoDelivery = document.getElementById('crm-tab-input-photo-delivery')?.value ?? (conversation.photoDelivery || '');
+  const period = document.getElementById('crm-tab-input-period')?.value ?? (conversation.period || '');
   const owner = document.getElementById('crm-tab-input-assignee').value;
 
   const bookingDoctor = document.getElementById('crm-tab-input-booking-doctor')?.value ?? (conversation.bookingDoctor || '');
@@ -2257,6 +2275,7 @@ window.saveActiveCustomerCrmFromTab = async function() {
     score,
     status,
     photoDelivery,
+    period,
     owner,
     bookingDoctor,
     bookingDate,

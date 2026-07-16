@@ -288,6 +288,7 @@ async function handleApi(req, res) {
     if (body.photoDelivery !== undefined) conversation.photoDelivery = body.photoDelivery;
     if (body.owner !== undefined) conversation.owner = body.owner;
     if (body.doctor !== undefined) conversation.doctor = body.doctor;
+    if (body.period !== undefined) conversation.period = body.period;
     
     if (body.before_img_count !== undefined) conversation.before_img_count = parseInt(body.before_img_count) || 0;
     if (body.after_img_count !== undefined) conversation.after_img_count = parseInt(body.after_img_count) || 0;
