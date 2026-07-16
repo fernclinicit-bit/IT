@@ -31,6 +31,7 @@ let conversations = [
   {
     id: "line-014",
     channel: "LINE",
+    lineAccount: 1,
     name: "คุณต้น",
     time: "09:58",
     owner: "Sale B",
@@ -56,6 +57,25 @@ let conversations = [
           reference: "LINE-1530-0827754410",
         },
       },
+    ],
+  },
+  {
+    id: "line-022",
+    channel: "LINE",
+    lineAccount: 2,
+    name: "คุณวิภา (LINE Acc 2)",
+    time: "10:15",
+    owner: "Sale B",
+    status: "ต้องติดตาม",
+    phone: "081-992-3344",
+    interest: "คอร์สปรับรูปหน้า",
+    bookingAmount: 1500,
+    sourcePost: "โฆษณาโปรสิว",
+    score: 78,
+    waitingMinutes: 0,
+    messages: [
+      ["customer", "สนใจแพ็กเกจปรับรูปหน้าค่ะ บัญชี 2"],
+      ["agent", "สวัสดีค่ะ จองคิวของบัญชี 2 วันไหนดีคะ"],
     ],
   },
   {
@@ -507,6 +527,9 @@ function createPatientPhotoDataUrl(conversation, attachment) {
 function getFilteredConversations() {
   const query = searchInput.value.trim().toLowerCase();
   return conversations.filter((item) => {
+    if (item.channel === "LINE" && item.lineAccount === 2) {
+      return false;
+    }
     const matchesChannel = channelFilter === "all" || item.channel === channelFilter;
     const haystack = `${item.name} ${item.phone} ${item.interest} ${getConversationMessages(item).map(getMessageText).join(" ")}`.toLowerCase();
     return matchesChannel && (!query || haystack.includes(query));
@@ -1803,10 +1826,12 @@ document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => 
 
 // CRM Workspace Loader & Table Renderer
 function renderCrm() {
-  const total = conversations.length;
-  const activeFollowups = conversations.filter(c => c.status === 'ต้องติดตาม').length;
-  const converted = conversations.filter(c => c.status === 'ปิดการขาย').length;
-  const overdueSla = conversations.filter(c => {
+  const crmConversations = conversations.filter(c => c.channel === 'LINE' && c.lineAccount === 2);
+
+  const total = crmConversations.length;
+  const activeFollowups = crmConversations.filter(c => c.status === 'ต้องติดตาม').length;
+  const converted = crmConversations.filter(c => c.status === 'ปิดการขาย').length;
+  const overdueSla = crmConversations.filter(c => {
     const aiState = getAiResponseState(c);
     return aiState.overdue;
   }).length;
@@ -1828,7 +1853,7 @@ function renderCrm() {
   const statusFilter = document.querySelector("#crmStatusFilter")?.value || "all";
   const assigneeFilter = document.querySelector("#crmAssigneeFilter")?.value || "all";
 
-  const filtered = conversations.filter((item) => {
+  const filtered = crmConversations.filter((item) => {
     const nameVal = (item.name || "").toLowerCase();
     const phoneVal = (item.phone || "");
     const searchMatch = !searchQuery || nameVal.includes(searchQuery) || phoneVal.includes(searchQuery);
