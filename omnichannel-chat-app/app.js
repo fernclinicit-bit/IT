@@ -914,12 +914,12 @@ function renderProfile() {
         <div class="field">
           <span>สถานะ</span>
           <select id="crm-input-status">
-            <option value="ตามครั้งที่ 1" ${item.status === 'ตามครั้งที่ 1' ? 'selected' : ''}>ตามครั้งที่ 1</option>
-            <option value="ตามครั้งที่ 2" ${item.status === 'ตามครั้งที่ 2' ? 'selected' : ''}>ตามครั้งที่ 2</option>
-            <option value="ตามครั้งที่ 3" ${item.status === 'ตามครั้งที่ 3' ? 'selected' : ''}>ตามครั้งที่ 3</option>
-            <option value="ตามครั้งที่ 4" ${item.status === 'ตามครั้งที่ 4' ? 'selected' : ''}>ตามครั้งที่ 4</option>
-            <option value="ตามครั้งที่ 5" ${item.status === 'ตามครั้งที่ 5' ? 'selected' : ''}>ตามครั้งที่ 5</option>
-            <option value="ตามครั้งที่ 6" ${item.status === 'ตามครั้งที่ 6' ? 'selected' : ''}>ตามครั้งที่ 6</option>
+            <option value="1-7 วัน" ${item.status === '1-7 วัน' ? 'selected' : ''}>1-7 วัน</option>
+            <option value="14 วัน" ${item.status === '14 วัน' ? 'selected' : ''}>14 วัน</option>
+            <option value="1 เดือน" ${item.status === '1 เดือน' ? 'selected' : ''}>1 เดือน</option>
+            <option value="3 เดือน" ${item.status === '3 เดือน' ? 'selected' : ''}>3 เดือน</option>
+            <option value="6 เดือน" ${item.status === '6 เดือน' ? 'selected' : ''}>6 เดือน</option>
+            <option value="9 เดือน" ${item.status === '9 เดือน' ? 'selected' : ''}>9 เดือน</option>
           </select>
         </div>
         <div class="field">
@@ -1819,7 +1819,7 @@ window.openCrmEditModal = function(customerId) {
   document.getElementById('crm-edit-interest').value = customer.interest || '';
   document.getElementById('crm-edit-source').value = customer.sourcePost || '';
   document.getElementById('crm-edit-score').value = customer.score || 0;
-  document.getElementById('crm-edit-status').value = customer.status || 'ตามครั้งที่ 1';
+  document.getElementById('crm-edit-status').value = customer.status || '1-7 วัน';
   document.getElementById('crm-edit-photo-delivery').value = customer.photoDelivery || '';
   document.getElementById('crm-edit-assignee').value = customer.owner || 'Unassigned';
 
@@ -2093,12 +2093,12 @@ function renderCrmProfile() {
         <div class="field">
           <span>สถานะ</span>
           <select id="crm-tab-input-status">
-            <option value="ตามครั้งที่ 1" ${item.status === 'ตามครั้งที่ 1' ? 'selected' : ''}>ตามครั้งที่ 1</option>
-            <option value="ตามครั้งที่ 2" ${item.status === 'ตามครั้งที่ 2' ? 'selected' : ''}>ตามครั้งที่ 2</option>
-            <option value="ตามครั้งที่ 3" ${item.status === 'ตามครั้งที่ 3' ? 'selected' : ''}>ตามครั้งที่ 3</option>
-            <option value="ตามครั้งที่ 4" ${item.status === 'ตามครั้งที่ 4' ? 'selected' : ''}>ตามครั้งที่ 4</option>
-            <option value="ตามครั้งที่ 5" ${item.status === 'ตามครั้งที่ 5' ? 'selected' : ''}>ตามครั้งที่ 5</option>
-            <option value="ตามครั้งที่ 6" ${item.status === 'ตามครั้งที่ 6' ? 'selected' : ''}>ตามครั้งที่ 6</option>
+            <option value="1-7 วัน" ${item.status === '1-7 วัน' ? 'selected' : ''}>1-7 วัน</option>
+            <option value="14 วัน" ${item.status === '14 วัน' ? 'selected' : ''}>14 วัน</option>
+            <option value="1 เดือน" ${item.status === '1 เดือน' ? 'selected' : ''}>1 เดือน</option>
+            <option value="3 เดือน" ${item.status === '3 เดือน' ? 'selected' : ''}>3 เดือน</option>
+            <option value="6 เดือน" ${item.status === '6 เดือน' ? 'selected' : ''}>6 เดือน</option>
+            <option value="9 เดือน" ${item.status === '9 เดือน' ? 'selected' : ''}>9 เดือน</option>
           </select>
         </div>
         <div class="field">
