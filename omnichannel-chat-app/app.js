@@ -920,8 +920,14 @@ function renderProfile() {
             <option value="ตามครั้งที่ 4" ${item.status === 'ตามครั้งที่ 4' ? 'selected' : ''}>ตามครั้งที่ 4</option>
             <option value="ตามครั้งที่ 5" ${item.status === 'ตามครั้งที่ 5' ? 'selected' : ''}>ตามครั้งที่ 5</option>
             <option value="ตามครั้งที่ 6" ${item.status === 'ตามครั้งที่ 6' ? 'selected' : ''}>ตามครั้งที่ 6</option>
-            <option value="ส่งรูปแล้ว" ${item.status === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
-            <option value="ไม่มีการส่งรูป" ${item.status === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>การส่งรูป</span>
+          <select id="crm-input-photo-delivery">
+            <option value="" ${!item.photoDelivery ? 'selected' : ''}>-- เลือกสถานะส่งรูป --</option>
+            <option value="ส่งรูปแล้ว" ${item.photoDelivery === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
+            <option value="ไม่มีการส่งรูป" ${item.photoDelivery === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
           </select>
         </div>
         <div class="field">
@@ -1726,6 +1732,7 @@ async function saveActiveCustomerCrm() {
   const sourcePost = document.getElementById('crm-input-source').value;
   const score = parseInt(document.getElementById('crm-input-score').value) || 0;
   const status = document.getElementById('crm-input-status').value;
+  const photoDelivery = document.getElementById('crm-input-photo-delivery').value;
   const owner = document.getElementById('crm-input-assignee').value;
 
   const bookingDoctor = document.getElementById('crm-input-booking-doctor').value;
@@ -1746,6 +1753,7 @@ async function saveActiveCustomerCrm() {
     sourcePost,
     score,
     status,
+    photoDelivery,
     owner,
     bookingDoctor,
     bookingDate,
@@ -1784,6 +1792,7 @@ async function saveActiveCustomerCrm() {
   conversation.sourcePost = sourcePost;
   conversation.score = score;
   conversation.status = status;
+  conversation.photoDelivery = photoDelivery;
   conversation.owner = owner;
   conversation.bookingDoctor = bookingDoctor;
   conversation.bookingDate = bookingDate;
@@ -1811,6 +1820,7 @@ window.openCrmEditModal = function(customerId) {
   document.getElementById('crm-edit-source').value = customer.sourcePost || '';
   document.getElementById('crm-edit-score').value = customer.score || 0;
   document.getElementById('crm-edit-status').value = customer.status || 'ตามครั้งที่ 1';
+  document.getElementById('crm-edit-photo-delivery').value = customer.photoDelivery || '';
   document.getElementById('crm-edit-assignee').value = customer.owner || 'Unassigned';
 
   document.getElementById('crm-edit-booking-doctor').value = customer.bookingDoctor || '';
@@ -1864,6 +1874,7 @@ document.getElementById('crmEditForm')?.addEventListener('submit', async (e) => 
     sourcePost: document.getElementById('crm-edit-source').value,
     score: parseInt(document.getElementById('crm-edit-score').value) || 0,
     status: document.getElementById('crm-edit-status').value,
+    photoDelivery: document.getElementById('crm-edit-photo-delivery').value,
     owner: document.getElementById('crm-edit-assignee').value,
     bookingDoctor: document.getElementById('crm-edit-booking-doctor').value,
     bookingDate: document.getElementById('crm-edit-booking-date').value,
@@ -2088,8 +2099,14 @@ function renderCrmProfile() {
             <option value="ตามครั้งที่ 4" ${item.status === 'ตามครั้งที่ 4' ? 'selected' : ''}>ตามครั้งที่ 4</option>
             <option value="ตามครั้งที่ 5" ${item.status === 'ตามครั้งที่ 5' ? 'selected' : ''}>ตามครั้งที่ 5</option>
             <option value="ตามครั้งที่ 6" ${item.status === 'ตามครั้งที่ 6' ? 'selected' : ''}>ตามครั้งที่ 6</option>
-            <option value="ส่งรูปแล้ว" ${item.status === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
-            <option value="ไม่มีการส่งรูป" ${item.status === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>การส่งรูป</span>
+          <select id="crm-tab-input-photo-delivery">
+            <option value="" ${!item.photoDelivery ? 'selected' : ''}>-- เลือกสถานะส่งรูป --</option>
+            <option value="ส่งรูปแล้ว" ${item.photoDelivery === 'ส่งรูปแล้ว' ? 'selected' : ''}>ส่งรูปแล้ว</option>
+            <option value="ไม่มีการส่งรูป" ${item.photoDelivery === 'ไม่มีการส่งรูป' ? 'selected' : ''}>ไม่มีการส่งรูป</option>
           </select>
         </div>
         <div class="field">
@@ -2141,6 +2158,7 @@ window.saveActiveCustomerCrmFromTab = async function() {
   const sourcePost = document.getElementById('crm-tab-input-source').value;
   const score = parseInt(document.getElementById('crm-tab-input-score').value) || 0;
   const status = document.getElementById('crm-tab-input-status').value;
+  const photoDelivery = document.getElementById('crm-tab-input-photo-delivery')?.value ?? (conversation.photoDelivery || '');
   const owner = document.getElementById('crm-tab-input-assignee').value;
 
   const bookingDoctor = document.getElementById('crm-tab-input-booking-doctor')?.value ?? (conversation.bookingDoctor || '');
@@ -2161,6 +2179,7 @@ window.saveActiveCustomerCrmFromTab = async function() {
     sourcePost,
     score,
     status,
+    photoDelivery,
     owner,
     bookingDoctor,
     bookingDate,

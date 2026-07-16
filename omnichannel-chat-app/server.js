@@ -284,6 +284,7 @@ async function handleApi(req, res) {
     if (body.sourcePost !== undefined) conversation.sourcePost = body.sourcePost;
     if (body.score !== undefined) conversation.score = parseInt(body.score) || 0;
     if (body.status !== undefined) conversation.status = body.status;
+    if (body.photoDelivery !== undefined) conversation.photoDelivery = body.photoDelivery;
     if (body.owner !== undefined) conversation.owner = body.owner;
     
     if (body.before_img_count !== undefined) conversation.before_img_count = parseInt(body.before_img_count) || 0;
