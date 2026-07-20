@@ -356,6 +356,31 @@ async function handleApi(req, res) {
     conversation.messages.push(message);
     conversation.waitingMinutes = 0;
     delete aiReplies[conversation.id];
+
+    // Outgoing Meta Graph API call to deliver real message
+    if (conversation.id.startsWith("fb-") && conversation.channel === "Facebook") {
+      const fbConfig = channelConfigs["facebook"] || {};
+      const pageAccessToken = fbConfig.accessToken;
+      if (pageAccessToken) {
+        const psid = conversation.id.replace("fb-", "");
+        fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${pageAccessToken}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            recipient: { id: psid },
+            message: { text: text }
+          })
+        })
+        .then(async r => {
+          if (!r.ok) {
+            const errBody = await r.text();
+            console.error("Meta API error details:", errBody);
+          }
+        })
+        .catch(err => console.error("Error calling Facebook Messenger API:", err));
+      }
+    }
+
     sendJson(res, 201, {
       ok: true,
       conversationId: conversation.id,
@@ -365,9 +390,84 @@ async function handleApi(req, res) {
     return;
   }
 
+  // Facebook Webhook Verification (GET)
+  if (req.method === "GET" && url.pathname === "/api/webhooks/facebook") {
+    const hubMode = url.searchParams.get("hub.mode");
+    const hubVerifyToken = url.searchParams.get("hub.verify_token");
+    const hubChallenge = url.searchParams.get("hub.challenge");
+
+    const fbConfig = channelConfigs["facebook"] || {};
+    const localVerifyToken = fbConfig.verifyToken || "default_verify_token";
+
+    if (hubMode === "subscribe" && hubVerifyToken === localVerifyToken) {
+      res.writeHead(200, { "Content-Type": "text/plain" });
+      res.end(hubChallenge);
+      return;
+    } else {
+      res.writeHead(403);
+      res.end("Verification failed");
+      return;
+    }
+  }
+
+  // Webhook Event Receivers (POST)
   if (req.method === "POST" && url.pathname.startsWith("/api/webhooks/")) {
     const platform = url.pathname.split("/").pop();
     const body = await readJsonBody(req);
+
+    // 1. Real Facebook Messenger Webhook
+    if (platform === "facebook" && body.object === "page") {
+      if (body.entry && Array.isArray(body.entry)) {
+        body.entry.forEach((entry) => {
+          if (entry.messaging && Array.isArray(entry.messaging)) {
+            entry.messaging.forEach((webhookEvent) => {
+              if (webhookEvent && webhookEvent.message) {
+                const senderId = webhookEvent.sender.id;
+                const text = webhookEvent.message.text || "ส่งรูปภาพหรือไฟล์";
+                const convoId = `fb-${senderId}`;
+                
+                let conversation = conversations.find((c) => c.id === convoId);
+                
+                if (!conversation) {
+                  conversation = {
+                    id: convoId,
+                    channel: "Facebook",
+                    name: `ลูกค้า Facebook (${senderId.slice(-4)})`,
+                    time: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }),
+                    owner: "Unassigned",
+                    status: "1-7 วัน",
+                    phone: "-",
+                    interest: "อื่นๆ",
+                    bookingAmount: 0,
+                    sourcePost: "Facebook Webhook",
+                    score: 50,
+                    waitingMinutes: 0,
+                    before_img_count: 0,
+                    after_img_count: 0,
+                    review_img_count: 0,
+                    messages: [],
+                  };
+                  conversations.unshift(conversation);
+                }
+
+                conversation.messages.push({
+                  role: "customer",
+                  text: text,
+                  sentAt: new Date().toISOString(),
+                  sentAtLabel: "เมื่อครู่",
+                });
+                conversation.waitingMinutes = 0;
+                delete aiReplies[convoId];
+              }
+            });
+          }
+        });
+      }
+      sendJson(res, 200, { ok: true, status: "EVENT_RECEIVED" });
+      return;
+    }
+
+    // 2. Fallback / Custom Mock Webhook (e.g. for testing)
     const id = `${platform}-${Date.now()}`;
     const conversation = {
       id,
@@ -381,7 +481,7 @@ async function handleApi(req, res) {
       sourcePost: body.sourcePost || "Webhook",
       score: 50,
       waitingMinutes: 0,
-      messages: [["customer", body.message || "ลูกค้าส่งข้อความใหม่"]],
+      messages: [[ "customer", body.message || "ลูกค้าส่งข้อความใหม่" ]],
     };
     conversations.unshift(conversation);
     sendJson(res, 201, { ok: true, conversation });

@@ -1484,6 +1484,18 @@ function updateConnectionStatus(platform, config) {
   }
 }
 
+async function syncConfigsToBackend(platform, config) {
+  try {
+    await fetch(`${API_BASE_URL}/api/channel-configs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ platform, config })
+    });
+  } catch (e) {
+    console.error("Failed to sync configs to backend:", e);
+  }
+}
+
 function loadChannelSettings() {
   const configs = getStoredConfigs();
   settingsGrid.querySelectorAll(".integration").forEach((card) => {
@@ -1493,6 +1505,9 @@ function loadChannelSettings() {
       card.querySelector(`[name="${fieldName}"]`).value = config[fieldName] || "";
     });
     updateConnectionStatus(platform, config);
+    if (Object.keys(config).length > 0) {
+      syncConfigsToBackend(platform, config);
+    }
   });
 }
 
@@ -1513,6 +1528,7 @@ function setupChannelSettings() {
       configs[platform] = config;
       saveStoredConfigs(configs);
       updateConnectionStatus(platform, config);
+      syncConfigsToBackend(platform, config);
       showToast("บันทึก Key สำหรับช่องทางนี้แล้ว");
     });
 
@@ -1533,6 +1549,7 @@ function setupChannelSettings() {
         card.querySelector(`[name="${fieldName}"]`).value = "";
       });
       updateConnectionStatus(platform, {});
+      syncConfigsToBackend(platform, {});
       showToast("ล้างค่า Key ของช่องทางนี้แล้ว");
     });
   });
@@ -2751,11 +2768,12 @@ window.connectTikTokOAuth = function() {
 window.addEventListener('message', (event) => {
   if (event.data.type === 'facebook-auth-success') {
     const configs = getStoredConfigs();
-    configs['facebook'] = {
+    const config = {
       pageId: event.data.pageId,
       accessToken: event.data.accessToken,
       verifyToken: event.data.verifyToken
     };
+    configs['facebook'] = config;
     saveStoredConfigs(configs);
     
     // Auto-fill forms in settings page if visible
@@ -2766,16 +2784,18 @@ window.addEventListener('message', (event) => {
       fbCard.querySelector('[name="verifyToken"]').value = event.data.verifyToken;
     }
     updateConnectionStatus('facebook', configs['facebook']);
+    syncConfigsToBackend('facebook', config);
     showToast("เชื่อมต่อ Facebook Messenger สำเร็จ ผ่าน Link!");
   }
 
   if (event.data.type === 'tiktok-auth-success') {
     const configs = getStoredConfigs();
-    configs['tiktok'] = {
+    const config = {
       businessId: event.data.businessId,
       clientKey: event.data.clientKey,
       clientSecret: event.data.clientSecret
     };
+    configs['tiktok'] = config;
     saveStoredConfigs(configs);
 
     // Auto-fill forms in settings page if visible
@@ -2786,6 +2806,7 @@ window.addEventListener('message', (event) => {
       ttCard.querySelector('[name="clientSecret"]').value = event.data.clientSecret;
     }
     updateConnectionStatus('tiktok', configs['tiktok']);
+    syncConfigsToBackend('tiktok', config);
     showToast("เชื่อมต่อ TikTok สำเร็จ ผ่าน Link!");
   }
 });
