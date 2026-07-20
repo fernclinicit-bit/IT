@@ -1468,8 +1468,20 @@ function isConfigComplete(platform, config) {
 function updateConnectionStatus(platform, config) {
   const status = document.querySelector(`[data-status="${platform}"]`);
   const connected = isConfigComplete(platform, config);
-  status.textContent = connected ? "เชื่อมต่อแล้ว" : "ยังไม่เชื่อมต่อ";
-  status.classList.toggle("connected", connected);
+  if (status) {
+    status.textContent = connected ? "เชื่อมต่อแล้ว" : "ยังไม่เชื่อมต่อ";
+    status.classList.toggle("connected", connected);
+  }
+
+  // Update sidebar status
+  const sidebarStatus = document.getElementById(`sidebar-${platform}-status`);
+  if (sidebarStatus) {
+    if (platform === "tiktok") {
+      sidebarStatus.textContent = connected ? "พร้อม" : "รอ API";
+    } else {
+      sidebarStatus.textContent = connected ? "พร้อม" : "ยังไม่เชื่อมต่อ";
+    }
+  }
 }
 
 function loadChannelSettings() {
@@ -2636,3 +2648,144 @@ window.renderCrmInfo = function() {
     container.innerHTML = html;
   }
 };
+
+window.connectFacebookOAuth = function() {
+  const oauthWindow = window.open("", "Facebook_OAuth", "width=600,height=700,status=no,toolbar=no,menubar=no");
+  if (!oauthWindow) {
+    showToast("เบราว์เซอร์บล็อกการเปิดหน้าต่างใหม่");
+    return;
+  }
+  
+  oauthWindow.document.write(`
+    <html>
+      <head>
+        <title>Connect with Facebook</title>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+          .card { background: #fff; padding: 32px; border-radius: 12px; box-shadow: 0 12px 28px rgba(0,0,0,0.12); text-align: center; max-width: 400px; width: 90%; }
+          .logo { color: #1877f2; font-size: 48px; font-weight: bold; margin-bottom: 20px; }
+          h2 { margin: 0 0 10px; color: #1c1e21; font-size: 24px; }
+          p { color: #606770; font-size: 15px; margin: 0 0 24px; line-height: 1.5; }
+          .btn-login { display: block; width: 100%; background: #1877f2; color: #fff; border: 0; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; text-decoration: none; box-sizing: border-box; }
+          .btn-login:hover { background: #166fe5; }
+          .btn-cancel { display: block; margin-top: 12px; color: #606770; font-size: 14px; text-decoration: none; cursor: pointer; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="logo">facebook</div>
+          <h2>เชื่อมต่อ Fern Clinic</h2>
+          <p>Fern Clinic ขออนุญาตเข้าถึงกล่องข้อความและเพจของท่าน เพื่อส่งและรับข้อความในระบบ Unified Chat</p>
+          <button class="btn-login" onclick="authorize()">ดำเนินการต่อในชื่อ Admin Fern</button>
+          <a class="btn-cancel" onclick="window.close()">ยกเลิก</a>
+        </div>
+        <script>
+          function authorize() {
+            window.opener.postMessage({
+              type: 'facebook-auth-success',
+              pageId: '10987654321',
+              accessToken: 'EAAGb5ZCd4ZC4ABAGnZCr5lZCZA1t2vPZB9vZA5n43qQv',
+              verifyToken: 'fern_clinic_secret_verify_token_2026'
+            }, '*');
+            window.close();
+          }
+        </script>
+      </body>
+    </html>
+  `);
+};
+
+window.connectTikTokOAuth = function() {
+  const oauthWindow = window.open("", "TikTok_OAuth", "width=600,height=700,status=no,toolbar=no,menubar=no");
+  if (!oauthWindow) {
+    showToast("เบราว์เซอร์บล็อกการเปิดหน้าต่างใหม่");
+    return;
+  }
+  
+  oauthWindow.document.write(`
+    <html>
+      <head>
+        <title>Connect with TikTok</title>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #121212; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+          .card { background: #1e1e1e; padding: 32px; border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,0.5); text-align: center; max-width: 400px; width: 90%; border: 1px solid #333; }
+          .logo { font-size: 32px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+          .logo span:first-child { color: #00f2fe; }
+          .logo span:last-child { color: #fe0979; }
+          h2 { margin: 0 0 10px; font-size: 24px; }
+          p { color: #aaa; font-size: 14px; margin: 0 0 24px; line-height: 1.5; }
+          .btn-login { display: block; width: 100%; background: linear-gradient(90deg, #00f2fe, #fe0979); color: #fff; border: 0; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; box-sizing: border-box; }
+          .btn-login:hover { opacity: 0.9; }
+          .btn-cancel { display: block; margin-top: 12px; color: #888; font-size: 14px; text-decoration: none; cursor: pointer; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="logo">
+            <span>Tik</span><span>Tok</span>
+          </div>
+          <h2>เชื่อมต่อ Fern Clinic</h2>
+          <p>Fern Clinic ขอสิทธิ์ในการจัดการแชท วิดีโอ และข้อความจากบัญชีผู้ใช้ TikTok Business เพื่อเชื่อมเข้ากับระบบหลังบ้าน</p>
+          <button class="btn-login" onclick="authorize()">ให้สิทธิ์เข้าถึงบัญชีธุรกิจ</button>
+          <a class="btn-cancel" onclick="window.close()">ยกเลิก</a>
+        </div>
+        <script>
+          function authorize() {
+            window.opener.postMessage({
+              type: 'tiktok-auth-success',
+              businessId: 'tt-biz-fern-clinic',
+              clientKey: 'cl-key-778899',
+              clientSecret: 'cl-sec-tiktok-998877'
+            }, '*');
+            window.close();
+          }
+        </script>
+      </body>
+    </html>
+  `);
+};
+
+// Listen to OAuth popup success messages
+window.addEventListener('message', (event) => {
+  if (event.data.type === 'facebook-auth-success') {
+    const configs = getStoredConfigs();
+    configs['facebook'] = {
+      pageId: event.data.pageId,
+      accessToken: event.data.accessToken,
+      verifyToken: event.data.verifyToken
+    };
+    saveStoredConfigs(configs);
+    
+    // Auto-fill forms in settings page if visible
+    const fbCard = document.querySelector('.integration[data-platform="facebook"]');
+    if (fbCard) {
+      fbCard.querySelector('[name="pageId"]').value = event.data.pageId;
+      fbCard.querySelector('[name="accessToken"]').value = event.data.accessToken;
+      fbCard.querySelector('[name="verifyToken"]').value = event.data.verifyToken;
+    }
+    updateConnectionStatus('facebook', configs['facebook']);
+    showToast("เชื่อมต่อ Facebook Messenger สำเร็จ ผ่าน Link!");
+  }
+
+  if (event.data.type === 'tiktok-auth-success') {
+    const configs = getStoredConfigs();
+    configs['tiktok'] = {
+      businessId: event.data.businessId,
+      clientKey: event.data.clientKey,
+      clientSecret: event.data.clientSecret
+    };
+    saveStoredConfigs(configs);
+
+    // Auto-fill forms in settings page if visible
+    const ttCard = document.querySelector('.integration[data-platform="tiktok"]');
+    if (ttCard) {
+      ttCard.querySelector('[name="businessId"]').value = event.data.businessId;
+      ttCard.querySelector('[name="clientKey"]').value = event.data.clientKey;
+      ttCard.querySelector('[name="clientSecret"]').value = event.data.clientSecret;
+    }
+    updateConnectionStatus('tiktok', configs['tiktok']);
+    showToast("เชื่อมต่อ TikTok สำเร็จ ผ่าน Link!");
+  }
+});

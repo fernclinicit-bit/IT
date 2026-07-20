@@ -67,17 +67,17 @@
           <div class="health-row">
             <span class="dot facebook"></span>
             <span>Facebook</span>
-            <strong>พร้อม</strong>
+            <strong id="sidebar-facebook-status">พร้อม</strong>
           </div>
           <div class="health-row">
             <span class="dot line"></span>
             <span>LINE</span>
-            <strong>พร้อม</strong>
+            <strong id="sidebar-line-status">พร้อม</strong>
           </div>
           <div class="health-row">
             <span class="dot tiktok"></span>
             <span>TikTok</span>
-            <strong>รอ API</strong>
+            <strong id="sidebar-tiktok-status">รอ API</strong>
           </div>
         </div>
       </aside>
@@ -518,6 +518,9 @@
                 <span class="connection-state" data-status="facebook">ยังไม่เชื่อมต่อ</span>
               </div>
               <code>/webhooks/facebook</code>
+              <button class="primary-button oauth-button" onclick="connectFacebookOAuth()" type="button" style="background: #1877f2; color: #fff; border: 0; padding: 10px 16px; border-radius: 8px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0;">
+                <span>🔗</span> เชื่อมต่อ Facebook Messenger ผ่าน Link
+              </button>
               <label class="form-field">
                 <span>Page ID</span>
                 <input name="pageId" type="text" placeholder="เช่น 1234567890" />
@@ -609,6 +612,9 @@
                 <span class="connection-state" data-status="tiktok">ยังไม่เชื่อมต่อ</span>
               </div>
               <code>/webhooks/tiktok</code>
+              <button class="primary-button oauth-button" onclick="connectTikTokOAuth()" type="button" style="background: #111827; color: #fff; border: 1px solid #374151; padding: 10px 16px; border-radius: 8px; font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0;">
+                <span>🔗</span> เชื่อมต่อ TikTok ผ่าน Link
+              </button>
               <label class="form-field">
                 <span>Business Account ID</span>
                 <input name="businessId" type="text" placeholder="กรอก Business account ID" />
